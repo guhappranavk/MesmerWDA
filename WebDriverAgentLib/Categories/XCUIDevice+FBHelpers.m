@@ -194,12 +194,16 @@ static bool fb_isLocked;
   
   id siriService = [self valueForKey:@"siriService"];
   if (nil != siriService) {
+    @try {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-    [siriService performSelector:NSSelectorFromString(@"activateWithVoiceRecognitionText:")
-                      withObject:[NSString stringWithFormat:@"Open {%@}", url]];
+      [siriService performSelector:NSSelectorFromString(@"activateWithVoiceRecognitionText:")
+                        withObject:[NSString stringWithFormat:@"Open {%@}", url]];
 #pragma clang diagnostic pop
-    return YES;
+      return YES;
+    } @catch (NSException *e) {
+      [FBLogger logFmt:@"%@", e.reason];
+    }
   }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
