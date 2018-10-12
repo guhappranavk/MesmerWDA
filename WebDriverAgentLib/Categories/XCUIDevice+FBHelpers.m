@@ -207,10 +207,10 @@ static bool fb_isLocked;
   }
   [supportedButtonNames addObject:@"home"];
 #if !TARGET_OS_SIMULATOR
-  if ([buttonName.lowercaseString isEqualToString:@"volumeUp"]) {
+  if ([buttonName.lowercaseString isEqualToString:@"volumeup"]) {
     dstButton = XCUIDeviceButtonVolumeUp;
   }
-  if ([buttonName.lowercaseString isEqualToString:@"volumeDown"]) {
+  if ([buttonName.lowercaseString isEqualToString:@"volumedown"]) {
     dstButton = XCUIDeviceButtonVolumeDown;
   }
   [supportedButtonNames addObject:@"volumeUp"];
