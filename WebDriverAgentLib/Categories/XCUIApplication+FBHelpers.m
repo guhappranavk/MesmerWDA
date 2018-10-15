@@ -90,8 +90,13 @@ const static NSTimeInterval FBMinimumAppSwitchWait = 3.0;
   info[@"rect"] = FBwdRectNoInf(snapshot.wdRect);
   info[@"frame"] = NSStringFromCGRect(snapshot.wdFrame);
   info[@"isEnabled"] = [@([snapshot isWDEnabled]) stringValue];
-  info[@"isVisible"] = [@([snapshot isWDVisible]) stringValue];
-
+//  info[@"isVisible"] = [@([snapshot isWDVisible]) stringValue];
+  info[@"hasFocus"] = [@([snapshot hasKeyboardFocus]) stringValue];
+  
+  NSDictionary *additionalAttrinutes = snapshot.additionalAttributes;
+  NSString *class = [additionalAttrinutes objectForKey:@5004];
+  info[@"class"] = class == nil ? @"" : class;
+  
   if (!recursive) {
     return info.copy;
   }

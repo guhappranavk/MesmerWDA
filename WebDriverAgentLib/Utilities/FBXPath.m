@@ -54,6 +54,14 @@
 
 @end
 
+@interface FBFocusAttribute : FBElementAttribute
+
+@end
+
+@interface FBClassAttribute : FBElementAttribute
+
+@end
+
 @interface FBDimensionAttribute : FBElementAttribute
 
 @end
@@ -417,11 +425,13 @@ static NSString *const FBAbstractMethodInvocationException = @"AbstractMethodInv
   // The list of attributes to be written for each XML node
   // The enumeration order does matter here
   return @[FBTypeAttribute.class,
+           FBClassAttribute.class,
            FBValueAttribute.class,
            FBNameAttribute.class,
            FBLabelAttribute.class,
            FBEnabledAttribute.class,
-           FBVisibleAttribute.class,
+//           FBVisibleAttribute.class,
+           FBFocusAttribute.class,
            FBXAttribute.class,
            FBYAttribute.class,
            FBWidthAttribute.class,
@@ -516,6 +526,38 @@ static NSString *const FBAbstractMethodInvocationException = @"AbstractMethodInv
 + (NSString *)valueForElement:(id<FBElement>)element
 {
   return element.wdVisible ? @"true" : @"false";
+}
+
+@end
+
+@implementation FBFocusAttribute
+
++ (NSString *)name
+{
+  return @"hasFocus";
+}
+
++ (NSString *)valueForElement:(id<FBElement>)element
+{
+  XCElementSnapshot *elementSnapshot = (XCElementSnapshot *)element;
+  return elementSnapshot.hasKeyboardFocus ? @"true" : @"false";
+}
+
+@end
+
+@implementation FBClassAttribute
+
++ (NSString *)name
+{
+  return @"class";
+}
+
++ (NSString *)valueForElement:(id<FBElement>)element
+{
+  XCElementSnapshot *elementSnapshot = (XCElementSnapshot *)element;
+  NSDictionary *additionalAttrinutes = elementSnapshot.additionalAttributes;
+  NSString *class = [additionalAttrinutes objectForKey:@5004];
+  return (class == nil ? @"" : class);
 }
 
 @end
