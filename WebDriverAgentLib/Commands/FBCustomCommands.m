@@ -36,6 +36,7 @@
   return
   @[
     [[FBRoute POST:@"/timeouts"] respondWithTarget:self action:@selector(handleTimeouts:)],
+    [[FBRoute GET:@"/bundleid/:bundleId/appState"].withoutSession respondWithTarget:self action:@selector(handleAppState:)],
     [[FBRoute POST:@"/wda/homescreen"].withoutSession respondWithTarget:self action:@selector(handleHomescreenCommand:)],
     [[FBRoute POST:@"/wda/deactivateApp"] respondWithTarget:self action:@selector(handleDeactivateAppCommand:)],
     [[FBRoute POST:@"/wda/keyboard/dismiss"] respondWithTarget:self action:@selector(handleDismissKeyboardCommand:)],
@@ -82,6 +83,14 @@
 {
   // This method is intentionally not supported.
   return FBResponseWithOK();
+}
+
++ (id<FBResponsePayload>)handleAppState:(FBRouteRequest *)request
+{
+  NSString *bundleId = request.parameters[@"bundleId"];
+  XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier:bundleId];
+  XCUIApplicationState state = app.state;
+  return FBResponseWithStatus(FBCommandStatusNoError, @(state));
 }
 
 + (id<FBResponsePayload>)handleDismissKeyboardCommand:(FBRouteRequest *)request
