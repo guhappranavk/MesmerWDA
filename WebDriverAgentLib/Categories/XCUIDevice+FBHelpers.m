@@ -22,6 +22,7 @@
 
 #import "XCUIDevice.h"
 #import "XCUIScreen.h"
+#import "XCAXClient_iOS.h"
 
 static const NSTimeInterval FBHomeButtonCoolOffTime = 1.;
 static const NSTimeInterval FBScreenLockTimeout = 5.;
@@ -117,6 +118,33 @@ static bool fb_isLocked;
     return nil;
   }
   return FBAdjustScreenshotOrientationForApplication(imageData, orientation);
+}
+
+- (NSData *)fb_screenshotHighWithError:(NSError*__autoreleasing*)error
+{
+  Class xcScreenClass = objc_lookUpClass("XCUIScreen");
+  if (nil == xcScreenClass) {
+    NSData *result = [[XCAXClient_iOS sharedClient] screenshotData];
+    if (nil == result) {
+      if (error) {
+        *error = [[FBErrorBuilder.builder withDescription:@"Cannot take a screenshot of the current screen state"] build];
+      }
+      return nil;
+    }
+    return result;
+  }
+  
+  //  XCUIApplication *app = FBApplication.fb_activeApplication;
+  //  CGSize screenSize = FBAdjustDimensionsForApplication(app.frame.size, app.interfaceOrientation);
+  //  NSUInteger quality = 0;
+  //  CGRect screenRect = CGRectMake(0, 0, screenSize.width, screenSize.height);
+  //
+  XCUIScreen *mainScreen = (XCUIScreen *)[xcScreenClass mainScreen];
+  //  return [mainScreen screenshotDataForQuality:quality rect:screenRect error:error];
+  
+  XCUIScreenshot *screenshot = [mainScreen screenshot];
+  NSData *result = [screenshot PNGRepresentation];
+  return result;
 }
 
 - (NSData *)fb_rawScreenshotWithQuality:(NSUInteger)quality rect:(CGRect)rect error:(NSError*__autoreleasing*)error

@@ -20,6 +20,7 @@
   return
   @[
     [[FBRoute GET:@"/screenshot"].withoutSession respondWithTarget:self action:@selector(handleGetScreenshot:)],
+    [[FBRoute GET:@"/screenshotHigh"].withoutSession respondWithTarget:self action:@selector(handleGetScreenshotHigh:)],
     [[FBRoute GET:@"/screenshot"] respondWithTarget:self action:@selector(handleGetScreenshot:)],
   ];
 }
@@ -31,6 +32,17 @@
 {
   NSError *error;
   NSData *screenshotData = [[XCUIDevice sharedDevice] fb_screenshotWithError:&error];
+  if (nil == screenshotData) {
+    return FBResponseWithError(error);
+  }
+  NSString *screenshot = [screenshotData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+  return FBResponseWithObject(screenshot);
+}
+
++ (id<FBResponsePayload>)handleGetScreenshotHigh:(FBRouteRequest *)request
+{
+  NSError *error;
+  NSData *screenshotData = [[XCUIDevice sharedDevice] fb_screenshotHighWithError:&error];
   if (nil == screenshotData) {
     return FBResponseWithError(error);
   }
