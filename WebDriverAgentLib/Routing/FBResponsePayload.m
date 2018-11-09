@@ -20,6 +20,8 @@
 #import "XCUIElement+FBUtilities.h"
 #import "XCUIElement+FBWebDriverAttributes.h"
 
+#import "BSSystemInfo.h"
+
 NSString *arbitraryAttrPrefix = @"attribute/";
 
 id<FBResponsePayload> FBResponseWithOK()
@@ -79,6 +81,7 @@ id<FBResponsePayload> FBResponseWithStatus(FBCommandStatus status, id object)
     @"value" : object ?: @{},
     @"sessionId" : [FBSession activeSession].identifier ?: NSNull.null,
     @"status" : @(status),
+    @"systemInfo" : systemInfo(),
   }];
 }
 
