@@ -12,13 +12,7 @@
 
 #import "BSSystemInfo.h"
 #import <UIKit/UIKit.h>
-
-//typedef struct {
-//  unsigned int system;
-//  unsigned int user;
-//  unsigned int nice;
-//  unsigned int idle;
-//} CPUUsage;
+#import "FBApplication.h"
 
 //
 double systemCpu(void) {
@@ -27,7 +21,6 @@ double systemCpu(void) {
   static host_cpu_load_info_data_t previous_info = {0, 0, 0, 0};
   host_cpu_load_info_data_t info;
   
-  //  CPUUsage usage = {0, 0, 0, 1};
   count = HOST_CPU_LOAD_INFO_COUNT;
   
   kr = host_statistics(mach_host_self(), HOST_CPU_LOAD_INFO, (host_info_t)&info, &count);
@@ -42,24 +35,33 @@ double systemCpu(void) {
   natural_t total  = user + nice + system + idle;
   previous_info    = info;
   
-  //  usage.user = user;
-  //  usage.system = system;
-  //  usage.nice = nice;
-  //  usage.idle = idle;
   return (user + nice + system) * 100.0 / total;
-  //  return usage;
+}
+
+task_t get_task(pid_t pid_, task_t *task) {
+  int result;
+  if ((result = task_for_pid(mach_task_self(), pid_, task)) != KERN_SUCCESS) {
+    return result;
+  }
+  return 0;
 }
 
 //
-double agentCpu(void) {
+double cpu(pid_t pid) {
   kern_return_t kr;
   task_info_data_t tinfo;
   mach_msg_type_number_t task_info_count;
   
+  task_t task;
+  int error = get_task(pid, &task);
+  if (error < 0) {
+    return 0.0;
+  }
+  
   task_info_count = TASK_INFO_MAX;
-  kr = task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)tinfo, &task_info_count);
+  kr = task_info(task, MACH_TASK_BASIC_INFO, (task_info_t)tinfo, &task_info_count);
   if (kr != KERN_SUCCESS) {
-    return -1;
+    return 0;
   }
   
   thread_array_t         thread_list;
@@ -71,9 +73,9 @@ double agentCpu(void) {
   thread_basic_info_t basic_info_th;
   
   // get threads in the task
-  kr = task_threads(mach_task_self(), &thread_list, &thread_count);
+  kr = task_threads(task, &thread_list, &thread_count);
   if (kr != KERN_SUCCESS) {
-    return -1;
+    return 0;
   }
   
   long total_time     = 0;
@@ -87,7 +89,7 @@ double agentCpu(void) {
     kr = thread_info(thread_list[j], THREAD_BASIC_INFO,
                      (thread_info_t)thinfo, &thread_info_count);
     if (kr != KERN_SUCCESS) {
-      return -1;
+      return 0;
     }
     
     basic_info_th = (thread_basic_info_t)thinfo;
@@ -101,17 +103,27 @@ double agentCpu(void) {
   
   kr = vm_deallocate(mach_task_self(), (vm_offset_t)thread_list, thread_count * sizeof(thread_t));
   if (kr != KERN_SUCCESS) {
-    return -1;
+    return 0;
   }
   return total_cpu;
 }
 
 //
-vm_size_t agentMemory(void) {
-  struct task_basic_info info;
-  mach_msg_type_number_t size = TASK_BASIC_INFO_COUNT;
-  kern_return_t kerr = task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &size);
-  return (kerr == KERN_SUCCESS) ? info.resident_size : 0;
+vm_size_t memory(pid_t pid) {
+  task_t task;
+  int error = get_task(pid, &task);
+  if (error < 0) {
+    return 0.0;
+  }
+  
+  struct mach_task_basic_info info;
+  mach_msg_type_number_t size = MACH_TASK_BASIC_INFO_COUNT;
+  kern_return_t kerr = task_info(task, MACH_TASK_BASIC_INFO, (task_info_t)&info, &size);
+  if( kerr == KERN_SUCCESS ) {
+    return info.resident_size;
+  }
+  NSLog(@"Error with task_info(): %s", mach_error_string(kerr));
+  return 0;
 }
 
 //
@@ -158,12 +170,18 @@ float batteryLevel(void) {
 }
 
 NSDictionary *cpuUsage(void) {
-  return @{@"agent": @(agentCpu()), @"other" : @(systemCpu())};
+  XCUIApplication *app = [FBApplication fb_activeApplication];
+  pid_t appPid = app.processID;
+  pid_t agentPid = [[NSProcessInfo processInfo] processIdentifier];
+  return @{@"agent": @(cpu(agentPid)), @"app" : @(cpu(appPid)), @"other" : @(systemCpu())};
 }
 
 NSDictionary *memoryUsage(void) {
+  XCUIApplication *app = [FBApplication fb_activeApplication];
+  pid_t appPid = app.processID;
+  pid_t agentPid = [[NSProcessInfo processInfo] processIdentifier];
   MemoryStats memStats = systemMemory();
-  return @{@"agent": @(agentMemory()), @"other" : @(memStats.system), @"free" : @(memStats.free)};
+  return @{@"agent": @(memory(agentPid)), @"app" : @(memory(appPid)), @"other" : @(memStats.system), @"free" : @(memStats.free)};
 }
 
 NSDictionary *systemInfo(void) {
