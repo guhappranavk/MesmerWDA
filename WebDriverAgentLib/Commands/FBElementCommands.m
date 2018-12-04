@@ -38,6 +38,7 @@
 #import "XCUIElement.h"
 #import "XCUIElementQuery.h"
 #import "FBXCodeCompatibility.h"
+#import "XCEventGenerator.h"
 
 @interface FBElementCommands ()
 @end
@@ -74,6 +75,7 @@
     [[FBRoute POST:@"/wda/element/:uuid/scroll"] respondWithTarget:self action:@selector(handleScroll:)],
     [[FBRoute POST:@"/wda/element/:uuid/dragfromtoforduration"] respondWithTarget:self action:@selector(handleDrag:)],
     [[FBRoute POST:@"/wda/dragfromtoforduration"] respondWithTarget:self action:@selector(handleDragCoordinate:)],
+    [[FBRoute POST:@"/wda/dragfromtoforduration2"] respondWithTarget:self action:@selector(handleDragCoordinate2:)],
     [[FBRoute POST:@"/wda/tap/:uuid"] respondWithTarget:self action:@selector(handleTap:)],
     [[FBRoute POST:@"/wda/touchAndHold"] respondWithTarget:self action:@selector(handleTouchAndHoldCoordinate:)],
     [[FBRoute POST:@"/wda/doubleTap"] respondWithTarget:self action:@selector(handleDoubleTapCoordinate:)],
@@ -316,6 +318,12 @@
 
 + (id<FBResponsePayload>)handleDragCoordinate:(FBRouteRequest *)request
 {
+  XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  NSArray *alerts = [[app alerts] allElementsBoundByIndex];
+  if (alerts.count > 0) {
+    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+  }
+  
   FBSession *session = request.session;
   CGPoint startPoint = CGPointMake((CGFloat)[request.arguments[@"fromX"] doubleValue], (CGFloat)[request.arguments[@"fromY"] doubleValue]);
   CGPoint endPoint = CGPointMake((CGFloat)[request.arguments[@"toX"] doubleValue], (CGFloat)[request.arguments[@"toY"] doubleValue]);
@@ -323,6 +331,37 @@
   XCUICoordinate *endCoordinate = [self.class gestureCoordinateWithCoordinate:endPoint application:session.activeApplication shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
   XCUICoordinate *startCoordinate = [self.class gestureCoordinateWithCoordinate:startPoint application:session.activeApplication shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
   [startCoordinate pressForDuration:duration thenDragToCoordinate:endCoordinate];
+  return FBResponseWithOK();
+}
+
++ (id<FBResponsePayload>)handleDragCoordinate2:(FBRouteRequest *)request
+{
+  XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  NSArray *alerts = [[app alerts] allElementsBoundByIndex];
+  if (alerts.count > 0) {
+    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+  }
+  
+  //  FBSession *session = request.session;
+  CGPoint startPoint = CGPointMake((CGFloat)[request.arguments[@"fromX"] doubleValue], (CGFloat)[request.arguments[@"fromY"] doubleValue]);
+  CGPoint endPoint = CGPointMake((CGFloat)[request.arguments[@"toX"] doubleValue], (CGFloat)[request.arguments[@"toY"] doubleValue]);
+  
+  double duration = [request.arguments[@"duration"] doubleValue] / 1000;
+  double velocity = [request.arguments[@"velocity"] doubleValue] * 100;
+  
+  if (velocity <= 400) {
+    velocity = 400;
+  }
+  
+  if (velocity > 1500) {
+    velocity = 1500;
+  }
+  
+  XCEventGenerator * eventGenerator = [XCEventGenerator sharedGenerator];
+  [eventGenerator pressAtPoint:startPoint forDuration:duration liftAtPoint:endPoint velocity:velocity orientation:UIInterfaceOrientationPortrait
+                          name:nil handler:^(XCSynthesizedEventRecord *record, NSError *error) {
+                            NSLog(@"Error: %@", error);
+                          }];
   return FBResponseWithOK();
 }
 
