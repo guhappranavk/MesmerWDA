@@ -79,9 +79,11 @@ static const NSTimeInterval FBANIMATION_TIMEOUT = 5.0;
   return [self.query elementSnapshotForDebugDescription];
 }
 
-static const NSTimeInterval AX_TIMEOUT = 15.;
+//static const NSTimeInterval AX_TIMEOUT = 15.;
 
 - (nullable XCElementSnapshot *)fb_snapshotWithAttributes {
+  return [self fb_lastSnapshot];
+  /*
   if (![FBConfiguration shouldLoadSnapshotWithAttributes]) {
     return nil;
   }
@@ -150,10 +152,13 @@ static const NSTimeInterval AX_TIMEOUT = 15.;
     }
   }
   return snapshotWithAttributes;
+   */
 }
 
 - (XCElementSnapshot *)fb_lastSnapshotFromQuery
 {
+    return [self fb_lastSnapshot];
+  /*
   XCElementSnapshot *snapshot = nil;
   @try {
     XCUIElementQuery *rootQuery = self.query;
@@ -172,6 +177,7 @@ static const NSTimeInterval AX_TIMEOUT = 15.;
     snapshot = nil;
   }
   return snapshot ?: self.fb_lastSnapshot;
+   */
 }
 
 - (NSArray<XCUIElement *> *)fb_filterDescendantsWithSnapshots:(NSArray<XCElementSnapshot *> *)snapshots
