@@ -23,6 +23,7 @@
 #import "FBUnknownCommands.h"
 #import "FBConfiguration.h"
 #import "FBLogger.h"
+#import "FBApplication.h"
 
 #import "XCUIDevice+FBHelpers.h"
 
@@ -111,6 +112,29 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
     abort();
   }
   [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
+  [self startTimedTask];
+}
+
+- (void)startTimedTask {
+  [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(performBackgroundTask) userInfo:nil repeats:YES];
+}
+
+- (void)performBackgroundTask {
+  static UIDeviceOrientation deviceOrientation;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    deviceOrientation = [[XCUIDevice sharedDevice] orientation];
+    NSLog(@"MESMER: Device Orientaion is %@", UIDeviceOrientationIsPortrait(deviceOrientation) ? @"Portrait" : @"Landscape");
+  });
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
+      UIDeviceOrientation orientation = [[XCUIDevice sharedDevice] orientation];
+      if (orientation != deviceOrientation) {
+        deviceOrientation = orientation;
+        NSLog(@"MESMER: Device Orientaion changed to %@", UIDeviceOrientationIsPortrait(deviceOrientation) ? @"Portrait" : @"Landscape");
+      }
+    });
+  });
 }
 
 - (void)initScreenshotsBroadcaster

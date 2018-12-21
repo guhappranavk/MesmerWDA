@@ -302,6 +302,14 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
   return 0;
 }
 
++ (CGFloat)screenHeight {
+  UIDeviceOrientation orientation = [[XCUIDevice sharedDevice] orientation];
+  if (orientation == UIDeviceOrientationIsPortrait(orientation)) {
+    return [UIScreen mainScreen].bounds.size.height * [UIScreen mainScreen].scale;
+  }
+  return [UIScreen mainScreen].bounds.size.width * [UIScreen mainScreen].scale;
+}
+
 + (int)writeXmlWithRootElement:(id<FBElement>)root indexPath:(nullable NSString *)indexPath elementStore:(nullable NSMutableDictionary *)elementStore includedAttributes:(nullable NSSet<Class> *)includedAttributes writer:(xmlTextWriterPtr)writer
 {
   NSAssert((indexPath == nil && elementStore == nil) || (indexPath != nil && elementStore != nil), @"Either both or none of indexPath and elementStore arguments should be equal to nil", nil);
@@ -360,6 +368,18 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
     if (elementStore != nil && newIndexPath != nil) {
       [elementStore setObject:childSnapshot forKey:(id)newIndexPath];
     }
+    
+    NSString *class = [FBClassAttribute valueForElement:childSnapshot];
+    if ([class caseInsensitiveCompare:@"UICollectionViewCell"] == NSOrderedSame ||
+        [class caseInsensitiveCompare:@"UITableViewCell"] == NSOrderedSame) {
+      CGFloat y = [[childSnapshot.wdRect objectForKey:@"y"] floatValue];
+      CGFloat height = [self screenHeight];
+      if (y < 0 || height < y) {
+        continue;
+      }
+    }
+    
+    
     rc = [self writeXmlWithRootElement:childSnapshot
                              indexPath:newIndexPath
                           elementStore:elementStore
