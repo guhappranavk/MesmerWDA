@@ -370,8 +370,10 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
     }
     
     NSString *class = [FBClassAttribute valueForElement:childSnapshot];
+    NSString *type = [FBTypeAttribute valueForElement:childSnapshot];
     if ([class caseInsensitiveCompare:@"UICollectionViewCell"] == NSOrderedSame ||
-        [class caseInsensitiveCompare:@"UITableViewCell"] == NSOrderedSame) {
+        [class caseInsensitiveCompare:@"UITableViewCell"] == NSOrderedSame ||
+        [type caseInsensitiveCompare:@"XCUIElementTypeCell"] == NSOrderedSame) {
       CGFloat y = [[childSnapshot.wdRect objectForKey:@"y"] floatValue];
       CGFloat height = [self screenHeight];
       if (y < 0 || height < y) {
