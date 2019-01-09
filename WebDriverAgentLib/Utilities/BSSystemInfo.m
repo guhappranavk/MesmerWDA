@@ -120,7 +120,7 @@ vm_size_t memory(pid_t pid) {
   mach_msg_type_number_t size = MACH_TASK_BASIC_INFO_COUNT;
   kern_return_t kerr = task_info(task, MACH_TASK_BASIC_INFO, (task_info_t)&info, &size);
   if( kerr == KERN_SUCCESS ) {
-    return info.resident_size;
+    return (vm_size_t)info.resident_size;
   }
   NSLog(@"Error with task_info(): %s", mach_error_string(kerr));
   return 0;
