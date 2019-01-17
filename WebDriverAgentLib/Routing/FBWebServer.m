@@ -112,6 +112,8 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
     abort();
   }
   [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
+  
+  [FBLogger logFmt:@"Appium WDA Version: %@", @"1.17.2019.1"];
   [self startTimedTask];
 }
 
