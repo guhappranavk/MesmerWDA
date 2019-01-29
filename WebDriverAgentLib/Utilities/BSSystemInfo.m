@@ -185,9 +185,15 @@ NSDictionary *memoryUsage(void) {
 }
 
 NSDictionary *systemInfo(void) {
-  return @{@"cpu" : cpuUsage(),
-           @"mem" : memoryUsage(),
-           @"disk" : diskUsage(),
-           @"battery" : @(batteryLevel()),
-           };
+  @try {
+    return @{@"cpu" : cpuUsage(),
+             @"mem" : memoryUsage(),
+             @"disk" : diskUsage(),
+             @"battery" : @(batteryLevel()),
+             };
+  }
+  @catch (NSException *e) {
+    NSLog(@"Exception getitng system info: %@", e);
+  }
+  return @{};
 }
