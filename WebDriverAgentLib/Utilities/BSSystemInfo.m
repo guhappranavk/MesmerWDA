@@ -34,7 +34,12 @@ double systemCpu(void) {
   natural_t idle   = info.cpu_ticks[CPU_STATE_IDLE] - previous_info.cpu_ticks[CPU_STATE_IDLE];
   natural_t total  = user + nice + system + idle;
   previous_info    = info;
-  
+  if (total == 0) {
+    return 0;
+  }
+  if (user + nice + system == 0) {
+    return 0;
+  }
   return (user + nice + system) * 100.0 / total;
 }
 
@@ -105,6 +110,9 @@ double cpu(pid_t pid) {
   if (kr != KERN_SUCCESS) {
     return 0;
   }
+  if (isnan(total_cpu)) {
+    total_cpu = 0;
+  }
   return total_cpu;
 }
 
@@ -120,6 +128,9 @@ vm_size_t memory(pid_t pid) {
   mach_msg_type_number_t size = MACH_TASK_BASIC_INFO_COUNT;
   kern_return_t kerr = task_info(task, MACH_TASK_BASIC_INFO, (task_info_t)&info, &size);
   if( kerr == KERN_SUCCESS ) {
+    if (isnan(info.resident_size)) {
+      return 0;
+    }
     return (vm_size_t)info.resident_size;
   }
   NSLog(@"Error with task_info(): %s", mach_error_string(kerr));
@@ -156,6 +167,12 @@ NSDictionary* diskUsage(void) {
     NSNumber *freeFileSystemSizeInBytes = [dictionary objectForKey:NSFileSystemFreeSize];
     unsigned long long total = [fileSystemSizeInBytes unsignedLongLongValue];
     unsigned long long free = [freeFileSystemSizeInBytes unsignedLongLongValue];
+    if (isnan(total)) {
+      total = 0;
+    }
+    if (isnan(free)) {
+      free = 0;
+    }
     return @{@"used" : @(total - free), @"free" : @(free)};
   }
   return @{@"used" : @(0), @"free" : @(0)};
@@ -166,6 +183,9 @@ float batteryLevel(void) {
   [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
   float level = [[UIDevice currentDevice] batteryLevel];
   level = level < 0 ? 1.0 : level;
+  if (isnan(level)) {
+    return 0;
+  }
   return level * 100;
 }
 
@@ -181,7 +201,7 @@ NSDictionary *memoryUsage(void) {
   pid_t appPid = app.processID;
   pid_t agentPid = [[NSProcessInfo processInfo] processIdentifier];
   MemoryStats memStats = systemMemory();
-  return @{@"agent": @(memory(agentPid)), @"app" : @(memory(appPid)), @"other" : @(memStats.system), @"free" : @(memStats.free)};
+  return @{@"agent": @(memory(agentPid)), @"app" : @(memory(appPid)), @"other" : @(isnan(memStats.system) ? 0 : memStats.system), @"free" : @(isnan(memStats.free) ? 0 : memStats.free)};
 }
 
 NSDictionary *systemInfo(void) {
