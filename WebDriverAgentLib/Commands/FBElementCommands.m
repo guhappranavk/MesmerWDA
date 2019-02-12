@@ -358,7 +358,7 @@
   }
   
   XCEventGenerator * eventGenerator = [XCEventGenerator sharedGenerator];
-  [eventGenerator pressAtPoint:startPoint forDuration:duration liftAtPoint:endPoint velocity:velocity orientation:UIInterfaceOrientationPortrait
+  [eventGenerator pressAtPoint:startPoint forDuration:duration liftAtPoint:endPoint velocity:velocity orientation:app.interfaceOrientation
                           name:nil handler:^(XCSynthesizedEventRecord *record, NSError *error) {
                             NSLog(@"Error: %@", error);
                           }];
