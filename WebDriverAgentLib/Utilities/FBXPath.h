@@ -59,6 +59,13 @@ extern NSString *const FBXPathQueryEvaluationException;
  */
 + (nullable NSString *)xmlStringWithRootElement:(id<FBElement>)root;
 
+
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query;
+
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query maxCells:(NSInteger)maxCells;
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point;
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point maxCells:(NSInteger)maxCells;
+
 @end
 
 NS_ASSUME_NONNULL_END

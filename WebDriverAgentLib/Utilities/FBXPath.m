@@ -107,6 +107,134 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
   return nil;
 }
 
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query
+{
+  return [self xmlStringWithSnapshot:root query:query point:CGPointZero];
+}
+
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query maxCells:(NSInteger)maxCells
+{
+  return [self xmlStringWithSnapshot:root query:query point:CGPointZero maxCells:maxCells];
+}
+
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point {
+  return [self xmlStringWithSnapshot:root query:query point:CGPointZero maxCells:-1];
+}
+
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point maxCells:(NSInteger)maxCells
+{
+  xmlDocPtr doc;
+  xmlTextWriterPtr writer = xmlNewTextWriterDoc(&doc, 0);
+  int rc = [FBXPath getSnapshotAsXML:(XCElementSnapshot *)root writer:writer elementStore:nil query:query point:point maxCells:maxCells];
+  if (rc < 0) {
+    xmlFreeTextWriter(writer);
+    xmlFreeDoc(doc);
+    return nil;
+  }
+  int buffersize;
+  xmlChar *xmlbuff;
+  xmlDocDumpFormatMemory(doc, &xmlbuff, &buffersize, 1);
+  xmlFreeTextWriter(writer);
+  xmlFreeDoc(doc);
+  return [NSString stringWithCString:(const char *)xmlbuff encoding:NSUTF8StringEncoding];
+}
+
++ (int)getSnapshotAsXML:(XCElementSnapshot *)root writer:(xmlTextWriterPtr)writer elementStore:(nullable NSMutableDictionary *)elementStore query:(nullable NSString*)query {
+  return [self getSnapshotAsXML:root writer:writer elementStore:elementStore query:query point:CGPointZero maxCells:-1];
+}
+
++ (int)getSnapshotAsXML:(XCElementSnapshot *)root writer:(xmlTextWriterPtr)writer elementStore:(nullable NSMutableDictionary *)elementStore query:(nullable NSString*)query point:(CGPoint)point maxCells:(NSInteger)maxCells
+{
+  int rc = xmlTextWriterStartDocument(writer, NULL, _UTF8Encoding, NULL);
+  if (rc < 0) {
+    [FBLogger logFmt:@"Failed to invoke libxml2>xmlTextWriterStartDocument. Error code: %d", rc];
+    return rc;
+  }
+  // Trying to be smart here and only including attributes, that were asked in the query, to the resulting document.
+  // This may speed up the lookup significantly in some cases
+  rc = [FBXPath generateXMLPresentation:root indexPath:(elementStore != nil ? topNodeIndexPath : nil) elementStore:elementStore includedAttributes:(query == nil ? nil : [self.class elementAttributesWithXPathQuery:query]) writer:writer point:point maxCells:maxCells];
+  if (rc < 0) {
+    [FBLogger log:@"Failed to generate XML presentation of a screen element"];
+    return rc;
+  }
+  if (nil != elementStore) {
+    // The current node should be in the store as well
+    elementStore[topNodeIndexPath] = root;
+  }
+  rc = xmlTextWriterEndDocument(writer);
+  if (rc < 0) {
+    [FBLogger logFmt:@"Failed to invoke libxml2>xmlXPathNewContext. Error code: %d", rc];
+    return rc;
+  }
+  return 0;
+}
+
++ (int)generateXMLPresentation:(XCElementSnapshot *)root indexPath:(nullable NSString *)indexPath elementStore:(nullable NSMutableDictionary *)elementStore includedAttributes:(nullable NSSet<Class> *)includedAttributes writer:(xmlTextWriterPtr)writer {
+  return [self generateXMLPresentation:root indexPath:indexPath elementStore:elementStore includedAttributes:includedAttributes writer:writer point:CGPointZero maxCells:-1];
+}
+
++ (int)generateXMLPresentation:(XCElementSnapshot *)root indexPath:(nullable NSString *)indexPath elementStore:(nullable NSMutableDictionary *)elementStore includedAttributes:(nullable NSSet<Class> *)includedAttributes writer:(xmlTextWriterPtr)writer point:(CGPoint)point maxCells:(NSInteger)maxCells
+{
+  NSAssert((indexPath == nil && elementStore == nil) || (indexPath != nil && elementStore != nil), @"Either both or none of indexPath and elementStore arguments should be equal to nil", nil);
+  
+  CGRect elementRect = root.wdFrame;
+  if (CGPointEqualToPoint(point, CGPointZero) == NO && CGRectContainsPoint(elementRect, point) == NO) {
+    return 0;
+  }
+  
+  int rc = xmlTextWriterStartElement(writer, [FBXPath xmlCharPtrForInput:[root.wdType cStringUsingEncoding:NSUTF8StringEncoding]]);
+  if (rc < 0) {
+    [FBLogger logFmt:@"Failed to invoke libxml2>xmlTextWriterStartElement. Error code: %d", rc];
+    return rc;
+  }
+  
+  rc = [FBXPath recordElementAttributes:writer forElement:root indexPath:indexPath includedAttributes:includedAttributes];
+  if (rc < 0) {
+    return rc;
+  }
+  
+  NSArray *children = root.children;
+  NSInteger visible = 0;
+  for (NSUInteger i = 0; i < [children count]; i++) {
+    XCElementSnapshot *childSnapshot = children[i];
+    NSString *newIndexPath = (indexPath != nil) ? [indexPath stringByAppendingFormat:@",%lu", (unsigned long)i] : nil;
+    if (elementStore != nil && newIndexPath != nil) {
+      elementStore[newIndexPath] = childSnapshot;
+    }
+    
+    NSString *class = [FBClassAttribute valueForElement:childSnapshot];
+    NSString *type = [FBTypeAttribute valueForElement:childSnapshot];
+    
+    if ([class caseInsensitiveCompare:@"UICollectionViewCell"] == NSOrderedSame ||
+        [class caseInsensitiveCompare:@"UITableViewCell"] == NSOrderedSame ||
+        [type caseInsensitiveCompare:@"XCUIElementTypeCell"] == NSOrderedSame) {
+      CGFloat y = [[childSnapshot.wdRect objectForKey:@"y"] floatValue];
+      CGFloat height = [self screenHeight];
+      if (y < 0 || height < y) {
+        continue;
+      }
+      else {
+        visible++;
+      }
+      if (maxCells > 0 && visible > maxCells) {
+        break;
+      }
+    }
+    
+    rc = [self generateXMLPresentation:childSnapshot indexPath:newIndexPath elementStore:elementStore includedAttributes:includedAttributes writer:writer point:point maxCells:maxCells];
+    if (rc < 0) {
+      return rc;
+    }
+  }
+  
+  rc = xmlTextWriterEndElement(writer);
+  if (rc < 0) {
+    [FBLogger logFmt:@"Failed to invoke libxml2>xmlTextWriterEndElement. Error code: %d", rc];
+    return rc;
+  }
+  return 0;
+}
+
 + (nullable NSString *)xmlStringWithRootElement:(id<FBElement>)root
 {
   xmlDocPtr doc;
