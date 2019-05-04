@@ -209,8 +209,10 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
         [class caseInsensitiveCompare:@"UITableViewCell"] == NSOrderedSame ||
         [type caseInsensitiveCompare:@"XCUIElementTypeCell"] == NSOrderedSame) {
       CGFloat y = [[childSnapshot.wdRect objectForKey:@"y"] floatValue];
+      CGFloat rowHeight = [[childSnapshot.wdRect objectForKey:@"height"] floatValue];
       CGFloat height = [self screenHeight];
-      if (y < 0 || height < y) {
+      //[FBLogger logFmt:@"%f <-> %f <-> %f", y, rowHeight, height];
+      if ((y + rowHeight) < 0 || height < y) {
         continue;
       }
       else {
@@ -503,8 +505,10 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
         [class caseInsensitiveCompare:@"UITableViewCell"] == NSOrderedSame ||
         [type caseInsensitiveCompare:@"XCUIElementTypeCell"] == NSOrderedSame) {
       CGFloat y = [[childSnapshot.wdRect objectForKey:@"y"] floatValue];
+      CGFloat rowHeight = [[childSnapshot.wdRect objectForKey:@"height"] floatValue];
       CGFloat height = [self screenHeight];
-      if (y < 0 || height < y) {
+      //[FBLogger logFmt:@"%f <-> %f <-> %f", y, rowHeight, height];
+      if ((y + rowHeight) < 0 || height < y) {
         continue;
       }
     }

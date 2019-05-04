@@ -414,7 +414,7 @@
   
   NSArray *allAlerts = [alerts arrayByAddingObjectsFromArray:appAlerts];
   
-  NSLog(@"### TIVO DEBUG 2: alerts count: %ld", allAlerts.count);
+  NSLog(@"### TIVO DEBUG 2: alerts count: %lu", (unsigned long)allAlerts.count);
   if (allAlerts.count > 0) {
     XCUIElement *alert = allAlerts[0];
     NSArray *texts = [[alert staticTexts] allElementsBoundByIndex];
