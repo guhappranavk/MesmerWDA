@@ -350,19 +350,36 @@
   double duration = [request.arguments[@"duration"] doubleValue] / 1000;
   double velocity = [request.arguments[@"velocity"] doubleValue] * 100;
   
-  if (velocity <= 400) {
-    velocity = 400;
+  if (velocity <= 50) {
+    velocity = 50;
   }
   
   if (velocity > 1500) {
     velocity = 1500;
   }
   
+  NSObject *lock = [NSObject new];
+  __block BOOL isHandlerCalled = NO;
+  
   XCEventGenerator * eventGenerator = [XCEventGenerator sharedGenerator];
   [eventGenerator pressAtPoint:startPoint forDuration:duration liftAtPoint:endPoint velocity:velocity orientation:app.interfaceOrientation
                           name:nil handler:^(XCSynthesizedEventRecord *record, NSError *error) {
-                            NSLog(@"Error: %@", error);
+                            NSLog(@"handleDragCoordinate2 Error: %@", error);
+                            @synchronized(lock) {
+                              isHandlerCalled = YES;
+                            }
                           }];
+  
+  while(true) {
+    @synchronized(lock) {
+      if (isHandlerCalled) {
+        //Exit from loop.
+        break;
+      }
+    }
+    //Keep the run loop running, so this thread isn't blocked.
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow:1]];
+  }
   return FBResponseWithOK();
 }
 
