@@ -68,8 +68,8 @@ static id<FBResponsePayload> FBNoSuchElementErrorResponseForRequest(FBRouteReque
 + (id<FBResponsePayload>)handleFindElements:(FBRouteRequest *)request
 {
   FBSession *session = request.session;
-  NSArray *elements = [self.class elementsUsing:request.arguments[@"using"]
-                                      withValue:request.arguments[@"value"]
+  NSArray *elements = [self.class elementsUsing:(NSString *)request.arguments[@"using"]
+                                      withValue:(NSString *)request.arguments[@"value"]
                                           under:session.activeApplication
                     shouldReturnAfterFirstMatch:NO];
   return FBResponseWithCachedElements(elements, request.session.elementCache, FBConfiguration.shouldUseCompactResponses);
@@ -101,8 +101,8 @@ static id<FBResponsePayload> FBNoSuchElementErrorResponseForRequest(FBRouteReque
 {
   FBElementCache *elementCache = request.session.elementCache;
   XCUIElement *element = [elementCache elementForUUID:request.parameters[@"uuid"]];
-  NSArray *foundElements = [self.class elementsUsing:request.arguments[@"using"]
-                                           withValue:request.arguments[@"value"]
+  NSArray *foundElements = [self.class elementsUsing:(NSString *)request.arguments[@"using"]
+                                           withValue:(NSString *)request.arguments[@"value"]
                                                under:element
                          shouldReturnAfterFirstMatch:NO];
   return FBResponseWithCachedElements(foundElements, request.session.elementCache, FBConfiguration.shouldUseCompactResponses);
@@ -126,33 +126,6 @@ static id<FBResponsePayload> FBNoSuchElementErrorResponseForRequest(FBRouteReque
                     withValue:value
                         under:element
   shouldReturnAfterFirstMatch:YES] firstObject];
-}
-
-+ (NSArray *)elementsUsing:(NSString *)usingText withValue:(NSString *)value under:(XCUIElement *)element shouldReturnAfterFirstMatch:(BOOL)shouldReturnAfterFirstMatch
-{
-  NSArray *elements;
-  const BOOL partialSearch = [usingText isEqualToString:@"partial link text"];
-  const BOOL isSearchByIdentifier = ([usingText isEqualToString:@"name"] || [usingText isEqualToString:@"id"] || [usingText isEqualToString:@"accessibility id"]);
-  if (partialSearch || [usingText isEqualToString:@"link text"]) {
-    NSArray *components = [value componentsSeparatedByString:@"="];
-    NSString *propertyValue = components.lastObject;
-    NSString *propertyName = (components.count < 2 ? @"name" : components.firstObject);
-    elements = [element fb_descendantsMatchingProperty:propertyName value:propertyValue partialSearch:partialSearch];
-  } else if ([usingText isEqualToString:@"class name"]) {
-    elements = [element fb_descendantsMatchingClassName:value shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch];
-  } else if ([usingText isEqualToString:@"class chain"]) {
-    elements = [element fb_descendantsMatchingClassChain:value shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch];
-  } else if ([usingText isEqualToString:@"xpath"]) {
-    elements = [element fb_descendantsMatchingXPathQuery:value shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch];
-  } else if ([usingText isEqualToString:@"predicate string"]) {
-    NSPredicate *predicate = [FBPredicate predicateWithFormat:value];
-    elements = [element fb_descendantsMatchingPredicate:predicate shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch];
-  } else if (isSearchByIdentifier) {
-    elements = [element fb_descendantsMatchingIdentifier:value shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch];
-  } else {
-    [[NSException exceptionWithName:FBElementAttributeUnknownException reason:[NSString stringWithFormat:@"Invalid locator requested: %@", usingText] userInfo:nil] raise];
-  }
-  return elements;
 }
 
 + (NSArray *)elementsUsing:(NSString *)usingText withValue:(NSString *)value under:(XCUIElement *)element shouldReturnAfterFirstMatch:(BOOL)shouldReturnAfterFirstMatch
