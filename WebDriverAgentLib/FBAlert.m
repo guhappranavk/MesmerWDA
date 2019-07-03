@@ -17,7 +17,6 @@
 #import "FBSpringboardApplication.h"
 #import "FBLogger.h"
 #import "FBXCodeCompatibility.h"
-#import "XCAXClient_iOS.h"
 #import "XCElementSnapshot+FBHelpers.h"
 #import "XCElementSnapshot.h"
 #import "XCTestManager_ManagerInterface-Protocol.h"
@@ -232,7 +231,7 @@ NSString *const FBAlertObstructingElementException = @"FBAlertObstructingElement
   if (!alert.exists) {
     return nil;
   }
-  [alert resolve];
+  [alert fb_nativeResolve];
   return alert;
 }
 

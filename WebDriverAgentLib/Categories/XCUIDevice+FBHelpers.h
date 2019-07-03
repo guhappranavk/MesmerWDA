@@ -55,7 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Returns screenshot
 
- @param rect The actual screen rect
+ @param rect The actual screen rect. Set it to CGRectNull to get a screenshot of the whole screen.
  @param quality The number in range 0-2, where 2 (JPG) is the lowest and 0 (PNG) is the highest quality.
  @param error If there is an error, upon return contains an NSError object that describes the problem.
  @return Device screenshot as PNG- or JPG-encoded data or nil in case of failure
@@ -98,6 +98,15 @@ NS_ASSUME_NONNULL_BEGIN
  @return YES if the button has been pressed
  */
 - (BOOL)fb_pressButton:(NSString *)buttonName error:(NSError **)error;
+
+/**
+ Activates Siri service voice recognition with the given text to parse
+
+ @param text The actual string to parse
+ @param error If there is an error, upon return contains an NSError object that describes the problem.
+ @return YES the command has been successfully executed by Siri voice recognition service
+ */
+- (BOOL)fb_activateSiriVoiceRecognitionWithText:(NSString *)text error:(NSError **)error;
 
 @end
 

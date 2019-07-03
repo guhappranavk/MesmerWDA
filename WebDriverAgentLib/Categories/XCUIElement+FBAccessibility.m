@@ -9,6 +9,7 @@
 
 #import "XCUIElement+FBAccessibility.h"
 
+#import "FBConfiguration.h"
 #import "XCElementSnapshot+FBHelpers.h"
 #import "XCTestPrivateSymbols.h"
 #import "XCUIElement+FBUtilities.h"
@@ -17,7 +18,7 @@
 
 - (BOOL)fb_isAccessibilityElement
 {
-  return self.fb_lastSnapshot.fb_isAccessibilityElement;
+  return (self.fb_snapshotWithAttributes ?: self.fb_lastSnapshot).fb_isAccessibilityElement;
 }
 
 @end
@@ -26,7 +27,14 @@
 
 - (BOOL)fb_isAccessibilityElement
 {
-  return [(NSNumber *)[self fb_attributeValue:FB_XCAXAIsElementAttribute] boolValue];
+  NSNumber *isAccessibilityElement = self.additionalAttributes[FB_XCAXAIsElementAttribute];
+  if (nil != isAccessibilityElement) {
+    return isAccessibilityElement.boolValue;
+  }
+  
+  NSString *attrName = [NSString stringWithCString:FB_XCAXAIsElementAttributeName
+                                          encoding:NSUTF8StringEncoding];
+  return [(NSNumber *)[self fb_attributeValue:attrName] boolValue];
 }
 
 @end

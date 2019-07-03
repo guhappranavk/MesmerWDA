@@ -18,6 +18,18 @@
 #import "XCUIDevice.h"
 #import "XCUIDevice+FBHealthCheck.h"
 #import "XCUIDevice+FBHelpers.h"
+#import "XCUIApplicationProcessDelay.h"
+
+static NSString* const USE_COMPACT_RESPONSES = @"shouldUseCompactResponses";
+static NSString* const ELEMENT_RESPONSE_ATTRIBUTES = @"elementResponseAttributes";
+static NSString* const MJPEG_SERVER_SCREENSHOT_QUALITY = @"mjpegServerScreenshotQuality";
+static NSString* const MJPEG_SERVER_FRAMERATE = @"mjpegServerFramerate";
+static NSString* const MJPEG_SCALING_FACTOR = @"mjpegScalingFactor";
+static NSString* const MJPEG_COMPRESSION_FACTOR = @"mjpegCompressionFactor";
+static NSString* const SCREENSHOT_QUALITY = @"screenshotQuality";
+static NSString* const KEYBOARD_AUTOCORRECTION = @"keyboardAutocorrection";
+static NSString* const KEYBOARD_PREDICTION = @"keyboardPrediction";
+static NSString* const SNAPSHOT_TIMEOUT = @"snapshotTimeout";
 
 @implementation FBSessionCommands
 
@@ -79,10 +91,16 @@
     [FBConfiguration setElementResponseAttributes:elementResponseAttributes];
   }
   if (requirements[@"maxTypingFrequency"]) {
-    [FBConfiguration setMaxTypingFrequency:[requirements[@"maxTypingFrequency"] integerValue]];
+    [FBConfiguration setMaxTypingFrequency:[requirements[@"maxTypingFrequency"] unsignedIntegerValue]];
   }
   if (requirements[@"shouldUseSingletonTestManager"]) {
     [FBConfiguration setShouldUseSingletonTestManager:[requirements[@"shouldUseSingletonTestManager"] boolValue]];
+  }
+  NSNumber *delay = requirements[@"eventloopIdleDelaySec"];
+  if ([delay doubleValue] > 0.0) {
+    [XCUIApplicationProcessDelay setEventLoopHasIdledDelay:[delay doubleValue]];
+  } else {
+    [XCUIApplicationProcessDelay disableEventLoopDelay];
   }
 
   [FBConfiguration setShouldWaitForQuiescence:[requirements[@"shouldWaitForQuiescence"] boolValue]];
@@ -194,8 +212,15 @@
 {
   return FBResponseWithObject(
     @{
-      @"shouldUseCompactResponses": @([FBConfiguration shouldUseCompactResponses]),
-      @"elementResponseAttributes": [FBConfiguration elementResponseAttributes]
+      USE_COMPACT_RESPONSES: @([FBConfiguration shouldUseCompactResponses]),
+      ELEMENT_RESPONSE_ATTRIBUTES: [FBConfiguration elementResponseAttributes],
+      MJPEG_SERVER_SCREENSHOT_QUALITY: @([FBConfiguration mjpegServerScreenshotQuality]),
+      MJPEG_SERVER_FRAMERATE: @([FBConfiguration mjpegServerFramerate]),
+      MJPEG_SCALING_FACTOR: @([FBConfiguration mjpegScalingFactor]),
+      SCREENSHOT_QUALITY: @([FBConfiguration screenshotQuality]),
+      KEYBOARD_AUTOCORRECTION: @([FBConfiguration keyboardAutocorrection]),
+      KEYBOARD_PREDICTION: @([FBConfiguration keyboardPrediction]),
+      SNAPSHOT_TIMEOUT: @([FBConfiguration snapshotTimeout])
     }
   );
 }
@@ -206,14 +231,32 @@
 {
   NSDictionary* settings = request.arguments[@"settings"];
 
-  if ([settings objectForKey:@"shouldUseCompactResponses"]) {
-    BOOL shouldUseCompactResponses = [[settings objectForKey:@"shouldUseCompactResponses"] boolValue];
-    [FBConfiguration setShouldUseCompactResponses:shouldUseCompactResponses];
+  if ([settings objectForKey:USE_COMPACT_RESPONSES]) {
+    [FBConfiguration setShouldUseCompactResponses:[[settings objectForKey:USE_COMPACT_RESPONSES] boolValue]];
   }
-
-  if ([settings objectForKey:@"elementResponseAttributes"]) {
-    NSString* elementResponseAttribute = [settings objectForKey:@"elementResponseAttributes"];
-    [FBConfiguration setElementResponseAttributes:elementResponseAttribute];
+  if ([settings objectForKey:ELEMENT_RESPONSE_ATTRIBUTES]) {
+    [FBConfiguration setElementResponseAttributes:(NSString *)[settings objectForKey:ELEMENT_RESPONSE_ATTRIBUTES]];
+  }
+  if ([settings objectForKey:MJPEG_SERVER_SCREENSHOT_QUALITY]) {
+    [FBConfiguration setMjpegServerScreenshotQuality:[[settings objectForKey:MJPEG_SERVER_SCREENSHOT_QUALITY] unsignedIntegerValue]];
+  }
+  if ([settings objectForKey:MJPEG_SERVER_FRAMERATE]) {
+    [FBConfiguration setMjpegServerFramerate:[[settings objectForKey:MJPEG_SERVER_FRAMERATE] unsignedIntegerValue]];
+  }
+  if ([settings objectForKey:SCREENSHOT_QUALITY]) {
+    [FBConfiguration setScreenshotQuality:[[settings objectForKey:SCREENSHOT_QUALITY] unsignedIntegerValue]];
+  }
+  if ([settings objectForKey:MJPEG_SCALING_FACTOR]) {
+    [FBConfiguration setMjpegScalingFactor:[[settings objectForKey:MJPEG_SCALING_FACTOR] unsignedIntegerValue]];
+  }
+  if ([settings objectForKey:KEYBOARD_AUTOCORRECTION]) {
+    [FBConfiguration setKeyboardAutocorrection:[[settings objectForKey:KEYBOARD_AUTOCORRECTION] boolValue]];
+  }
+  if ([settings objectForKey:KEYBOARD_PREDICTION]) {
+    [FBConfiguration setKeyboardPrediction:[[settings objectForKey:KEYBOARD_PREDICTION] boolValue]];
+  }
+  if ([settings objectForKey:SNAPSHOT_TIMEOUT]) {
+    [FBConfiguration setSnapshotTimeout:[[settings objectForKey:SNAPSHOT_TIMEOUT] doubleValue]];
   }
 
   return [self handleGetSettings:request];

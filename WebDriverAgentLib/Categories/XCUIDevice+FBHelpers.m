@@ -16,6 +16,7 @@
 
 #import "FBSpringboardApplication.h"
 #import "FBErrorBuilder.h"
+#import "FBImageUtils.h"
 #import "FBMacros.h"
 #import "FBMathUtils.h"
 #import "FBXCodeCompatibility.h"
@@ -39,14 +40,14 @@ static bool fb_isLocked;
 + (void)fb_registerAppforDetectLockState
 {
   int notify_token;
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wstrict-prototypes"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wstrict-prototypes"
   notify_register_dispatch("com.apple.springboard.lockstate", &notify_token, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^(int token) {
     uint64_t state = UINT64_MAX;
     notify_get_state(token, &state);
     fb_isLocked = state != 0;
   });
-  #pragma clang diagnostic pop
+#pragma clang diagnostic pop
 }
 
 - (BOOL)fb_goToHomescreenWithError:(NSError **)error
@@ -90,11 +91,15 @@ static bool fb_isLocked;
   }
   [self pressButton:XCUIDeviceButtonHome];
   [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:FBHomeButtonCoolOffTime]];
+#if !TARGET_OS_TV
   if (SYSTEM_VERSION_LESS_THAN(@"10.0")) {
     [[FBApplication fb_activeApplication] swipeRight];
   } else {
     [self pressButton:XCUIDeviceButtonHome];
   }
+#else
+  [self pressButton:XCUIDeviceButtonHome];
+#endif
   [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:FBHomeButtonCoolOffTime]];
   return [[[[FBRunLoopSpinner new]
             timeout:FBScreenLockTimeout]
@@ -106,18 +111,15 @@ static bool fb_isLocked;
 
 - (NSData *)fb_screenshotWithError:(NSError*__autoreleasing*)error
 {
-  FBApplication *activeApplication = FBApplication.fb_activeApplication;
-  UIInterfaceOrientation orientation = activeApplication.interfaceOrientation;
-  CGSize screenSize = FBAdjustDimensionsForApplication(activeApplication.frame.size, orientation);
-  CGRect screenRect = CGRectMake(0, 0, screenSize.width, screenSize.height);
-  // https://developer.apple.com/documentation/xctest/xctimagequality?language=objc
-  // Select lower quality, since XCTest crashes randomly if the maximum quality (zero value) is selected
-  // and the resulting screenshot does not fit the memory buffer preallocated for it by the operating system
-  NSData *imageData = [self fb_rawScreenshotWithQuality:1 rect:screenRect error:error];
-  if (nil == imageData) {
+  NSData* screenshotData = [self fb_rawScreenshotWithQuality:FBConfiguration.screenshotQuality rect:CGRectNull error:error];
+  if (nil == screenshotData) {
     return nil;
   }
-  return FBAdjustScreenshotOrientationForApplication(imageData, orientation);
+#if TARGET_OS_TV
+  return FBAdjustScreenshotOrientationForApplication(screenshotData);
+#else
+  return FBAdjustScreenshotOrientationForApplication(screenshotData, FBApplication.fb_activeApplication.interfaceOrientation);
+#endif
 }
 
 - (NSData *)fb_screenshotHighWithError:(NSError*__autoreleasing*)error
@@ -149,11 +151,7 @@ static bool fb_isLocked;
 
 - (NSData *)fb_rawScreenshotWithQuality:(NSUInteger)quality rect:(CGRect)rect error:(NSError*__autoreleasing*)error
 {
-  NSData *imageData = [XCUIScreen.mainScreen screenshotDataForQuality:quality rect:rect error:error];
-  if (nil == imageData) {
-    return nil;
-  }
-  return imageData;
+  return [XCUIScreen.mainScreen screenshotDataForQuality:quality rect:rect error:error];
 }
 
 - (BOOL)fb_fingerTouchShouldMatch:(BOOL)shouldMatch
@@ -204,15 +202,10 @@ static bool fb_isLocked;
              withDescriptionFormat:@"'%@' is not a valid URL", url]
             buildError:error];
   }
-  
+
   id siriService = [self valueForKey:@"siriService"];
   if (nil != siriService) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-    [siriService performSelector:NSSelectorFromString(@"activateWithVoiceRecognitionText:")
-                      withObject:[NSString stringWithFormat:@"Open {%@}", url]];
-#pragma clang diagnostic pop
-    return YES;
+    return [self fb_activateSiriVoiceRecognitionWithText:[NSString stringWithFormat:@"Open {%@}", url] error:error];
   }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -225,6 +218,92 @@ static bool fb_isLocked;
   }
   return YES;
 }
+
+- (BOOL)fb_activateSiriVoiceRecognitionWithText:(NSString *)text error:(NSError **)error
+{
+  id siriService = [self valueForKey:@"siriService"];
+  if (nil == siriService) {
+    return [[[FBErrorBuilder builder]
+             withDescription:@"Siri service is not available on the device under test"]
+            buildError:error];
+  }
+  @try {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+    [siriService performSelector:NSSelectorFromString(@"activateWithVoiceRecognitionText:")
+                      withObject:text];
+#pragma clang diagnostic pop
+    return YES;
+  } @catch (NSException *e) {
+    return [[[FBErrorBuilder builder]
+             withDescriptionFormat:@"%@", e.reason]
+            buildError:error];
+  }
+}
+
+#if TARGET_OS_TV
+- (BOOL)fb_pressButton:(NSString *)buttonName error:(NSError **)error
+{
+  NSMutableArray<NSString *> *supportedButtonNames = [NSMutableArray array];
+  NSInteger remoteButton = -1; // no remote button
+  if ([buttonName.lowercaseString isEqualToString:@"home"]) {
+    //  XCUIRemoteButtonHome        = 7
+    remoteButton = XCUIRemoteButtonHome;
+  }
+  [supportedButtonNames addObject:@"home"];
+
+  // https://developer.apple.com/design/human-interface-guidelines/tvos/remote-and-controllers/remote/
+  if ([buttonName.lowercaseString isEqualToString:@"up"]) {
+    //  XCUIRemoteButtonUp          = 0,
+    remoteButton = XCUIRemoteButtonUp;
+  }
+  [supportedButtonNames addObject:@"up"];
+
+  if ([buttonName.lowercaseString isEqualToString:@"down"]) {
+    //  XCUIRemoteButtonDown        = 1,
+    remoteButton = XCUIRemoteButtonDown;
+  }
+  [supportedButtonNames addObject:@"down"];
+
+  if ([buttonName.lowercaseString isEqualToString:@"left"]) {
+    //  XCUIRemoteButtonLeft        = 2,
+    remoteButton = XCUIRemoteButtonLeft;
+  }
+  [supportedButtonNames addObject:@"left"];
+
+  if ([buttonName.lowercaseString isEqualToString:@"right"]) {
+    //  XCUIRemoteButtonRight       = 3,
+    remoteButton = XCUIRemoteButtonRight;
+  }
+  [supportedButtonNames addObject:@"right"];
+
+  if ([buttonName.lowercaseString isEqualToString:@"menu"]) {
+    //  XCUIRemoteButtonMenu        = 5,
+    remoteButton = XCUIRemoteButtonMenu;
+  }
+  [supportedButtonNames addObject:@"menu"];
+
+  if ([buttonName.lowercaseString isEqualToString:@"playpause"]) {
+    //  XCUIRemoteButtonPlayPause   = 6,
+    remoteButton = XCUIRemoteButtonPlayPause;
+  }
+  [supportedButtonNames addObject:@"playpause"];
+
+  if ([buttonName.lowercaseString isEqualToString:@"select"]) {
+    //  XCUIRemoteButtonSelect      = 4,
+    remoteButton = XCUIRemoteButtonSelect;
+  }
+  [supportedButtonNames addObject:@"select"];
+
+  if (remoteButton == -1) {
+    return [[[FBErrorBuilder builder]
+             withDescriptionFormat:@"The button '%@' is unknown. Only the following button names are supported: %@", buttonName, supportedButtonNames]
+            buildError:error];
+  }
+  [[XCUIRemote sharedRemote] pressButton:remoteButton];
+  return YES;
+}
+#else
 
 - (BOOL)fb_pressButton:(NSString *)buttonName error:(NSError **)error
 {
@@ -244,6 +323,7 @@ static bool fb_isLocked;
   [supportedButtonNames addObject:@"volumeUp"];
   [supportedButtonNames addObject:@"volumeDown"];
 #endif
+
   if (dstButton == 0) {
     return [[[FBErrorBuilder builder]
              withDescriptionFormat:@"The button '%@' is unknown. Only the following button names are supported: %@", buttonName, supportedButtonNames]
@@ -252,5 +332,6 @@ static bool fb_isLocked;
   [self pressButton:dstButton];
   return YES;
 }
+#endif
 
 @end

@@ -50,10 +50,13 @@
     [[FBRoute GET:@"/wda/screen"] respondWithTarget:self action:@selector(handleGetScreen:)],
     [[FBRoute GET:@"/wda/activeAppInfo"] respondWithTarget:self action:@selector(handleActiveAppInfo:)],
     [[FBRoute GET:@"/wda/activeAppInfo"].withoutSession respondWithTarget:self action:@selector(handleActiveAppInfo:)],
+#if !TARGET_OS_TV // tvOS does not provide relevant APIs
     [[FBRoute POST:@"/wda/setPasteboard"] respondWithTarget:self action:@selector(handleSetPasteboard:)],
     [[FBRoute POST:@"/wda/getPasteboard"] respondWithTarget:self action:@selector(handleGetPasteboard:)],
     [[FBRoute GET:@"/wda/batteryInfo"] respondWithTarget:self action:@selector(handleGetBatteryInfo:)],
+#endif
     [[FBRoute POST:@"/wda/pressButton"] respondWithTarget:self action:@selector(handlePressButtonCommand:)],
+    [[FBRoute POST:@"/wda/siri/activate"] respondWithTarget:self action:@selector(handleActivateSiri:)],
     [[FBRoute POST:@"/wda/resetLocation"].withoutSession respondWithTarget:self action:@selector(handleResetLocationCommand:)]
   ];
 }
@@ -97,7 +100,13 @@
 
 + (id<FBResponsePayload>)handleDismissKeyboardCommand:(FBRouteRequest *)request
 {
+#if TARGET_OS_TV
+  if ([self isKeyboardPresent]) {
+    [[XCUIRemote sharedRemote] pressButton: XCUIRemoteButtonMenu];
+  }
+#else
   [request.session.activeApplication dismissKeyboard];
+#endif
   NSError *error;
   NSString *errorDescription = @"The keyboard cannot be dismissed. Try to dismiss it in the way supported by your application under test.";
   if ([UIDevice.currentDevice userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
@@ -108,14 +117,20 @@
      timeout:5]
     timeoutErrorMessage:errorDescription]
    spinUntilTrue:^BOOL{
-     XCUIElement *foundKeyboard = [request.session.activeApplication descendantsMatchingType:XCUIElementTypeKeyboard].fb_firstMatch;
-     return !(foundKeyboard && foundKeyboard.fb_isVisible);
+     return ![self isKeyboardPresent];
    }
    error:&error];
   if (!isKeyboardNotPresent) {
     return FBResponseWithError(error);
   }
   return FBResponseWithOK();
+}
+
+#pragma mark - Helpers
+
++ (BOOL)isKeyboardPresent {
+  XCUIElement *foundKeyboard = [[FBApplication fb_activeApplication].query descendantsMatchingType:XCUIElementTypeKeyboard].fb_firstMatch;
+  return foundKeyboard && foundKeyboard.fb_isVisible;
 }
 
 + (id<FBResponsePayload>)handleGetScreen:(FBRouteRequest *)request
@@ -165,6 +180,7 @@
   });
 }
 
+#if !TARGET_OS_TV
 + (id<FBResponsePayload>)handleSetPasteboard:(FBRouteRequest *)request
 {
   NSString *contentType = request.arguments[@"contentType"] ?: @"plaintext";
@@ -202,6 +218,7 @@
     @"state": @([UIDevice currentDevice].batteryState)
   });
 }
+#endif
 
 + (id<FBResponsePayload>)handlePressButtonCommand:(FBRouteRequest *)request
 {
@@ -225,6 +242,15 @@
     [self tap:@"Reset" app:app];
     [self tap:@"Reset Location & Privacy" app:app];
     [self tap:@"Reset Warnings" app:app];
+  }
+  return FBResponseWithOK();
+}
+
++ (id<FBResponsePayload>)handleActivateSiri:(FBRouteRequest *)request
+{
+  NSError *error;
+  if (![XCUIDevice.sharedDevice fb_activateSiriVoiceRecognitionWithText:(id)request.arguments[@"text"] error:&error]) {
+    return FBResponseWithError(error);
   }
   return FBResponseWithOK();
 }

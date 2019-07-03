@@ -147,17 +147,19 @@ static NSMutableDictionary<NSNumber *, NSMutableDictionary<NSString *, NSNumber 
   __block NSError *innerError = nil;
   id<XCTestManager_ManagerInterface> proxy = [FBXCTestDaemonsProxy testRunnerProxy];
   dispatch_semaphore_t sem = dispatch_semaphore_create(0);
-  [proxy _XCT_setAXTimeout:AX_TIMEOUT reply:^(int res) {
-    [proxy _XCT_requestElementAtPoint:point
-                                reply:^(XCAccessibilityElement *element, NSError *error) {
-      if (nil == error) {
-        result = element;
-      } else {
-        innerError = error;
-      }
-      dispatch_semaphore_signal(sem);
-    }];
-  }];
+  [FBXCTestDaemonsProxy tryToSetAxTimeout:AX_TIMEOUT
+                                 forProxy:proxy
+                              withHandler:^(int res) {
+                                [proxy _XCT_requestElementAtPoint:point
+                                                            reply:^(XCAccessibilityElement *element, NSError *error) {
+                                                              if (nil == error) {
+                                                                result = element;
+                                                              } else {
+                                                                innerError = error;
+                                                              }
+                                                              dispatch_semaphore_signal(sem);
+                                                            }];
+                              }];
   dispatch_semaphore_wait(sem, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(AX_TIMEOUT * NSEC_PER_SEC)));
   if (nil != innerError) {
     [FBLogger logFmt:@"Cannot get the accessibility element for the point where %@ snapshot is located. Original error: '%@'", innerError.description, self.description];
@@ -167,11 +169,9 @@ static NSMutableDictionary<NSNumber *, NSMutableDictionary<NSString *, NSNumber 
 
 - (BOOL)fb_isVisible
 {
-  if ([FBConfiguration shouldLoadSnapshotWithAttributes]) {
-    NSNumber *isVisible = self.additionalAttributes[FB_XCAXAIsVisibleAttribute];
-    if (isVisible != nil) {
-      return isVisible.boolValue;
-    }
+  NSNumber *isVisible = self.additionalAttributes[FB_XCAXAIsVisibleAttribute];
+  if (isVisible != nil) {
+    return isVisible.boolValue;
   }
   
   NSNumber *cachedValue = [self fb_cachedVisibilityValue];
@@ -185,15 +185,14 @@ static NSMutableDictionary<NSNumber *, NSMutableDictionary<NSString *, NSNumber 
   }
 
   if ([FBConfiguration shouldUseTestManagerForVisibilityDetection]) {
-    BOOL isVisible = [(NSNumber *)[self fb_attributeValue:FB_XCAXAIsVisibleAttribute] boolValue];
-    return [self fb_cacheVisibilityWithValue:isVisible forAncestors:nil];
+    NSString *visibleAttrName = [NSString stringWithCString:FB_XCAXAIsVisibleAttributeName
+                                                   encoding:NSUTF8StringEncoding];
+    BOOL visibleAttrValue = [(NSNumber *)[self fb_attributeValue:visibleAttrName] boolValue];
+    return [self fb_cacheVisibilityWithValue:visibleAttrValue forAncestors:nil];
   }
 
   NSArray<XCElementSnapshot *> *ancestors = self.fb_ancestors;
   XCElementSnapshot *parentWindow = ancestors.count > 1 ? [ancestors objectAtIndex:ancestors.count - 2] : nil;
-  XCElementSnapshot *appElement = ancestors.count > 0 ? [ancestors lastObject] : self;
-
-  CGRect appFrame = appElement.frame;
   CGRect visibleRect = selfFrame;
   if (nil != parentWindow) {
     visibleRect = [self fb_frameInContainer:parentWindow hierarchyIntersection:nil];
@@ -203,6 +202,9 @@ static NSMutableDictionary<NSNumber *, NSMutableDictionary<NSString *, NSNumber 
   }
   CGPoint midPoint = CGPointMake(visibleRect.origin.x + visibleRect.size.width / 2,
                                  visibleRect.origin.y + visibleRect.size.height / 2);
+#if !TARGET_OS_TV // TV has no orientation, so it does not need to coordinate
+  XCElementSnapshot *appElement = ancestors.count > 0 ? [ancestors lastObject] : self;
+  CGRect appFrame = appElement.frame;
   CGRect windowFrame = nil == parentWindow ? selfFrame : parentWindow.frame;
   if ((appFrame.size.height > appFrame.size.width && windowFrame.size.height < windowFrame.size.width) ||
       (appFrame.size.height < appFrame.size.width && windowFrame.size.height > windowFrame.size.width)) {
@@ -211,6 +213,7 @@ static NSMutableDictionary<NSNumber *, NSMutableDictionary<NSString *, NSNumber 
     // However, upside-down case cannot be covered this way, which is not important for Appium
     midPoint = FBInvertPointForApplication(midPoint, appFrame.size, FBApplication.fb_activeApplication.interfaceOrientation);
   }
+#endif
   XCAccessibilityElement *hitElement = [self elementAtPoint:midPoint];
   if (nil != hitElement) {
     if ([self.accessibilityElement isEqualToElement:hitElement]) {

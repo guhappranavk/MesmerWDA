@@ -22,6 +22,7 @@
 #import "XCUIElement.h"
 #import "XCSynthesizedEventRecord.h"
 #import "XCPointerEventPath.h"
+#import "XCPointerEvent.h"
 
 
 static NSString *const FB_KEY_TYPE = @"type";
@@ -56,6 +57,7 @@ static NSString *const FB_KEY_PARAMETERS = @"parameters";
 static NSString *const FB_KEY_ACTIONS = @"actions";
 
 
+#if !TARGET_OS_TV
 @interface FBW3CGestureItem : FBBaseGestureItem
 
 @property (nullable, readonly, nonatomic) FBBaseGestureItem *previousItem;
@@ -158,7 +160,7 @@ static NSString *const FB_KEY_ACTIONS = @"actions";
 {
   self = [super initWithActionItem:actionItem application:application previousItem:previousItem offset:offset error:error];
   if (self) {
-    _pressure = [actionItem objectForKey:FB_ACTION_ITEM_KEY_PRESSURE];;
+    _pressure = [actionItem objectForKey:FB_ACTION_ITEM_KEY_PRESSURE];
   }
   return self;
 }
@@ -177,8 +179,9 @@ static NSString *const FB_KEY_ACTIONS = @"actions";
     }
   }
   XCPointerEventPath *result = [[XCPointerEventPath alloc] initForTouchAtPoint:self.atPosition offset:FBMillisToSeconds(self.offset)];
-  if (nil != self.pressure) {
-    [result pressDownWithPressure:self.pressure.doubleValue atOffset:FBMillisToSeconds(self.offset)];
+  if (nil != self.pressure && nil != result.pointerEvents.lastObject) {
+    XCPointerEvent *pointerEvent = (XCPointerEvent *)result.pointerEvents.lastObject;
+    pointerEvent.pressure = self.pressure.doubleValue;
   }
   return @[result];
 }
@@ -490,3 +493,4 @@ static NSString *const FB_KEY_ACTIONS = @"actions";
 }
 
 @end
+#endif

@@ -28,16 +28,12 @@ const static NSTimeInterval FBMinimumAppSwitchWait = 3.0;
 
 - (BOOL)fb_deactivateWithDuration:(NSTimeInterval)duration error:(NSError **)error
 {
-  NSString *applicationIdentifier = self.label;
   if(![[XCUIDevice sharedDevice] fb_goToHomescreenWithError:error]) {
     return NO;
   }
   [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:MAX(duration, FBMinimumAppSwitchWait)]];
-  if (self.fb_isActivateSupported) {
-    [self fb_activate];
-    return YES;
-  }
-  return [[FBSpringboardApplication fb_springboard] fb_tapApplicationWithIdentifier:applicationIdentifier error:error];
+  [self fb_activate];
+  return YES;
 }
 
 - (NSDictionary *)fb_tree
@@ -73,7 +69,7 @@ const static NSTimeInterval FBMinimumAppSwitchWait = 3.0;
 {
   [self fb_waitUntilSnapshotIsStable];
   // We ignore all elements except for the main window for accessibility tree
-  return [self.class accessibilityInfoForElement:self.fb_lastSnapshot];
+  return [self.class accessibilityInfoForElement:(self.fb_snapshotWithAttributes ?: self.fb_lastSnapshot)];
 }
 
 + (NSDictionary *)dictionaryForElement:(XCElementSnapshot *)snapshot recursive:(BOOL)recursive
@@ -90,13 +86,18 @@ const static NSTimeInterval FBMinimumAppSwitchWait = 3.0;
   info[@"rect"] = FBwdRectNoInf(snapshot.wdRect);
   info[@"frame"] = NSStringFromCGRect(snapshot.wdFrame);
   info[@"isEnabled"] = [@([snapshot isWDEnabled]) stringValue];
+
 //  info[@"isVisible"] = [@([snapshot isWDVisible]) stringValue];
   info[@"hasFocus"] = [@([snapshot hasKeyboardFocus]) stringValue];
-  
+
+#if TARGET_OS_TV
+  info[@"isFocused"] = [@([snapshot isWDFocused]) stringValue];
+#endif
+
   NSDictionary *additionalAttrinutes = snapshot.additionalAttributes;
   NSString *class = [additionalAttrinutes objectForKey:@5004];
   info[@"class"] = class == nil ? @"" : class;
-  
+
   if (!recursive) {
     return info.copy;
   }
@@ -168,5 +169,14 @@ const static NSTimeInterval FBMinimumAppSwitchWait = 3.0;
            matchingPredicate:[NSPredicate predicateWithFormat:@"hasKeyboardFocus == YES"]]
           fb_firstMatch];
 }
+
+#if TARGET_OS_TV
+- (XCUIElement *)fb_focusedElement
+{
+  return [[[self descendantsMatchingType:XCUIElementTypeAny]
+           matchingPredicate:[NSPredicate predicateWithFormat:@"hasFocus == true"]]
+          fb_firstMatch];
+}
+#endif
 
 @end

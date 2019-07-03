@@ -22,9 +22,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (id<XCTestManager_ManagerInterface>)testRunnerProxy;
 
+#if !TARGET_OS_TV
 + (UIInterfaceOrientation)orientationWithApplication:(XCUIApplication *)application;
+#endif
 
 + (BOOL)synthesizeEventWithRecord:(XCSynthesizedEventRecord *)record error:(NSError *__autoreleasing*)error;
+
++ (void)tryToSetAxTimeout:(double)timeout forProxy:(id<XCTestManager_ManagerInterface>)proxy withHandler:(void (^)(int res))handler;
 
 @end
 
