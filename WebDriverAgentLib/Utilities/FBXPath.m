@@ -193,6 +193,11 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
     return rc;
   }
   
+  //Get Height of parent.
+  CGFloat rootMinY = [[root.wdRect objectForKey:@"y"] floatValue];
+  CGFloat rootHeigh = [[root.wdRect objectForKey:@"height"] floatValue];
+  CGFloat rootMaxY = rootMinY + rootHeigh - 1;
+  
   NSArray *children = root.children;
   NSInteger visible = 0;
   for (NSUInteger i = 0; i < [children count]; i++) {
@@ -208,9 +213,15 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
     if ([class caseInsensitiveCompare:@"UICollectionViewCell"] == NSOrderedSame ||
         [class caseInsensitiveCompare:@"UITableViewCell"] == NSOrderedSame ||
         [type caseInsensitiveCompare:@"XCUIElementTypeCell"] == NSOrderedSame) {
-      CGFloat y = [[childSnapshot.wdRect objectForKey:@"y"] floatValue];
-      CGFloat height = [self screenHeight];
-      if (y < 0 || height < y) {
+      
+      //Get Height of Row
+      CGFloat rowMinY = [[childSnapshot.wdRect objectForKey:@"y"] floatValue];
+      CGFloat rowHeight = [[childSnapshot.wdRect objectForKey:@"height"] floatValue];
+      CGFloat rowMaxY = rowMinY + rowHeight - 1;
+      
+      //[FBLogger logFmt:@"%f <-> %f || %f <-> %f", rowMinY, rowMaxY, rootMinY, rootMaxY];
+      
+      if (rowMaxY < rootMinY || rowMinY > rootMaxY) {
         continue;
       }
       else {
@@ -430,6 +441,7 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
   return 0;
 }
 
+/*
 + (CGFloat)screenHeight {
   UIDeviceOrientation orientation = [[XCUIDevice sharedDevice] orientation];
   if (orientation == UIDeviceOrientationIsPortrait(orientation)) {
@@ -437,6 +449,7 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
   }
   return [UIScreen mainScreen].bounds.size.width * [UIScreen mainScreen].scale;
 }
+*/
 
 + (int)writeXmlWithRootElement:(id<FBElement>)root indexPath:(nullable NSString *)indexPath elementStore:(nullable NSMutableDictionary *)elementStore includedAttributes:(nullable NSSet<Class> *)includedAttributes writer:(xmlTextWriterPtr)writer
 {
@@ -490,6 +503,11 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
     return rc;
   }
 
+  //Get Height of parent.
+  CGFloat rootMinY = [[currentSnapshot.wdRect objectForKey:@"y"] floatValue];
+  CGFloat rootHeigh = [[currentSnapshot.wdRect objectForKey:@"height"] floatValue];
+  CGFloat rootMaxY = rootMinY + rootHeigh - 1;
+  
   for (NSUInteger i = 0; i < [children count]; i++) {
     XCElementSnapshot *childSnapshot = [children objectAtIndex:i];
     NSString *newIndexPath = (indexPath != nil) ? [indexPath stringByAppendingFormat:@",%lu", (unsigned long)i] : nil;
@@ -502,9 +520,15 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
     if ([class caseInsensitiveCompare:@"UICollectionViewCell"] == NSOrderedSame ||
         [class caseInsensitiveCompare:@"UITableViewCell"] == NSOrderedSame ||
         [type caseInsensitiveCompare:@"XCUIElementTypeCell"] == NSOrderedSame) {
-      CGFloat y = [[childSnapshot.wdRect objectForKey:@"y"] floatValue];
-      CGFloat height = [self screenHeight];
-      if (y < 0 || height < y) {
+      
+      //Get Height of Row
+      CGFloat rowMinY = [[childSnapshot.wdRect objectForKey:@"y"] floatValue];
+      CGFloat rowHeight = [[childSnapshot.wdRect objectForKey:@"height"] floatValue];
+      CGFloat rowMaxY = rowMinY + rowHeight - 1;
+      
+      //[FBLogger logFmt:@"%f <-> %f || %f <-> %f", rowMinY, rowMaxY, rootMinY, rootMaxY];
+      
+      if (rowMaxY < rootMinY || rowMinY > rootMaxY) {
         continue;
       }
     }

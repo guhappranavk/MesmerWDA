@@ -14,6 +14,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface FBFindElementCommands : NSObject <FBCommandHandler>
+
++ (NSArray *)elementsUsing:(NSString *)usingText withValue:(NSString *)value under:(XCUIElement *)element shouldReturnAfterFirstMatch:(BOOL)shouldReturnAfterFirstMatch;
+
 @end
 
 NS_ASSUME_NONNULL_END

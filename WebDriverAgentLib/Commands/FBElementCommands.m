@@ -77,6 +77,7 @@
     [[FBRoute POST:@"/wda/dragfromtoforduration"] respondWithTarget:self action:@selector(handleDragCoordinate:)],
     [[FBRoute POST:@"/wda/dragfromtoforduration2"] respondWithTarget:self action:@selector(handleDragCoordinate2:)],
     [[FBRoute POST:@"/wda/tap/:uuid"] respondWithTarget:self action:@selector(handleTap:)],
+    [[FBRoute POST:@"/wda/tap"] respondWithTarget:self action:@selector(handleTapCoordinate:)],
     [[FBRoute POST:@"/wda/touchAndHold"] respondWithTarget:self action:@selector(handleTouchAndHoldCoordinate:)],
     [[FBRoute POST:@"/wda/doubleTap"] respondWithTarget:self action:@selector(handleDoubleTapCoordinate:)],
     [[FBRoute POST:@"/wda/keys"] respondWithTarget:self action:@selector(handleKeys:)],
@@ -349,19 +350,36 @@
   double duration = [request.arguments[@"duration"] doubleValue] / 1000;
   double velocity = [request.arguments[@"velocity"] doubleValue] * 100;
   
-  if (velocity <= 400) {
-    velocity = 400;
+  if (velocity <= 50) {
+    velocity = 50;
   }
   
   if (velocity > 1500) {
     velocity = 1500;
   }
   
+  NSObject *lock = [NSObject new];
+  __block BOOL isHandlerCalled = NO;
+  
   XCEventGenerator * eventGenerator = [XCEventGenerator sharedGenerator];
   [eventGenerator pressAtPoint:startPoint forDuration:duration liftAtPoint:endPoint velocity:velocity orientation:app.interfaceOrientation
                           name:nil handler:^(XCSynthesizedEventRecord *record, NSError *error) {
-                            NSLog(@"Error: %@", error);
+                            NSLog(@"handleDragCoordinate2 Error: %@", error);
+                            @synchronized(lock) {
+                              isHandlerCalled = YES;
+                            }
                           }];
+  
+  while(true) {
+    @synchronized(lock) {
+      if (isHandlerCalled) {
+        //Exit from loop.
+        break;
+      }
+    }
+    //Keep the run loop running, so this thread isn't blocked.
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow:1]];
+  }
   return FBResponseWithOK();
 }
 
@@ -414,7 +432,7 @@
   
   NSArray *allAlerts = [alerts arrayByAddingObjectsFromArray:appAlerts];
   
-  NSLog(@"### TIVO DEBUG 2: alerts count: %ld", allAlerts.count);
+  NSLog(@"### TIVO DEBUG 2: alerts count: %lu", (unsigned long)allAlerts.count);
   if (allAlerts.count > 0) {
     XCUIElement *alert = allAlerts[0];
     NSArray *texts = [[alert staticTexts] allElementsBoundByIndex];
@@ -458,6 +476,56 @@
       return FBResponseWithError(error);
     }
   }
+  return FBResponseWithOK();
+}
+
++ (id<FBResponsePayload>)handleTapCoordinate:(FBRouteRequest *)request {
+  CGPoint tapPoint = CGPointMake((CGFloat)[request.arguments[@"x"] doubleValue], (CGFloat)[request.arguments[@"y"] doubleValue]);
+  
+  XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  NSArray *alerts = [[app alerts] allElementsBoundByIndex];
+  
+  FBApplication *application = request.session.activeApplication ?: [FBApplication fb_activeApplication];
+  NSArray *appAlerts = [[application alerts] allElementsBoundByIndex];
+  
+  NSArray *allAlerts = [alerts arrayByAddingObjectsFromArray:appAlerts];
+  
+  NSLog(@"### TIVO DEBUG 2: alerts count: %lu", (unsigned long)allAlerts.count);
+  if (allAlerts.count > 0) {
+    XCUIElement *alert = allAlerts[0];
+    NSArray *texts = [[alert staticTexts] allElementsBoundByIndex];
+    NSString *title = [texts[0] label];
+    NSString *subtitle = texts.count > 1 ? [texts[1] label] : @"";
+    NSArray *buttons = [[alert buttons] allElementsBoundByIndex];
+    for (XCUIElement *button in buttons) {
+      if (CGRectContainsPoint(button.frame, tapPoint)) {
+        NSString *label = [button label];
+        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
+        [button tap];
+        return FBResponseWithStatus(FBCommandStatusNoError, @{
+                                                              @"action": @"tap",
+                                                              @"element": @"button",
+                                                              @"id": label,
+                                                              @"point": @{
+                                                                  @"x": @(tapPoint.x),
+                                                                  @"y": @(tapPoint.y)
+                                                                  },
+                                                              @"alert":@{
+                                                                  @"title" : title != nil ? title : @"",
+                                                                  @"subtitle" : subtitle != nil ? subtitle : @""
+                                                                  }
+                                                              });
+      }
+    }
+    
+    if (allAlerts.count > 0) {
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+    }
+  }
+    
+  XCUICoordinate *tapCoordinate = [self.class gestureCoordinateWithCoordinate:tapPoint application:request.session.activeApplication shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
+  [tapCoordinate tap];
+  
   return FBResponseWithOK();
 }
 

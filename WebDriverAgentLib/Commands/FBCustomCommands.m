@@ -28,6 +28,7 @@
 #import "XCUIElement.h"
 #import "XCUIElement+FBIsVisible.h"
 #import "XCUIElementQuery.h"
+#import "FBFindElementCommands.h"
 
 @implementation FBCustomCommands
 
@@ -53,6 +54,7 @@
     [[FBRoute POST:@"/wda/getPasteboard"] respondWithTarget:self action:@selector(handleGetPasteboard:)],
     [[FBRoute GET:@"/wda/batteryInfo"] respondWithTarget:self action:@selector(handleGetBatteryInfo:)],
     [[FBRoute POST:@"/wda/pressButton"] respondWithTarget:self action:@selector(handlePressButtonCommand:)],
+    [[FBRoute POST:@"/wda/resetLocation"].withoutSession respondWithTarget:self action:@selector(handleResetLocationCommand:)]
   ];
 }
 
@@ -208,6 +210,32 @@
     return FBResponseWithError(error);
   }
   return FBResponseWithOK();
+}
+
++ (id<FBResponsePayload>)handleResetLocationCommand:(FBRouteRequest *)request
+{
+  XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.Preferences"];
+  [app activate];
+  
+  if ([self tap:@"Reset Location & Privacy" app:app]) {
+    [self tap:@"Reset Warnings" app:app];
+  }
+  else {
+    [self tap:@"General" app:app];
+    [self tap:@"Reset" app:app];
+    [self tap:@"Reset Location & Privacy" app:app];
+    [self tap:@"Reset Warnings" app:app];
+  }
+  return FBResponseWithOK();
+}
+
++ (BOOL)tap:(NSString *)name app:(XCUIApplication *)app {
+  NSArray *elements = [FBFindElementCommands elementsUsing:@"id" withValue:name under:app shouldReturnAfterFirstMatch:NO];
+  if (elements.count > 0) {
+    XCUIElement *element = elements[0];
+    return [element fb_tapWithError:nil];
+  }
+  return NO;
 }
 
 @end

@@ -81,7 +81,7 @@ id<FBResponsePayload> FBResponseWithStatus(FBCommandStatus status, id object)
     @"value" : object ?: @{},
     @"sessionId" : [FBSession activeSession].identifier ?: NSNull.null,
     @"status" : @(status),
-    @"systemInfo" : systemInfo(),
+    @"systemInfo" : @{} // systemInfo(),
   }];
 }
 
