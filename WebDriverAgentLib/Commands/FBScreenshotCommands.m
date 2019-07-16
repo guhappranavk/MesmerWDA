@@ -22,6 +22,7 @@
   @[
     [[FBRoute GET:@"/screenshot"].withoutSession respondWithTarget:self action:@selector(handleGetScreenshot:)],
     [[FBRoute GET:@"/screenshotHigh"].withoutSession respondWithTarget:self action:@selector(handleGetScreenshotHigh:)],
+    [[FBRoute GET:@"/screenClassification"].withoutSession respondWithTarget:self action:@selector(handleGetScreenshotClassification:)],
     [[FBRoute GET:@"/screenshot"] respondWithTarget:self action:@selector(handleGetScreenshot:)],
   ];
 }
@@ -42,26 +43,6 @@
 
 + (id<FBResponsePayload>)handleGetScreenshotHigh:(FBRouteRequest *)request
 {
-//  UIImage *image = [UIImage imageNamed:@"loader-001.jpg" inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil];
-//  NSDictionary *values = [[BSWDataModelHandler sharedInstance] runModelOnImage:image];
-//  NSLog(@"loader-001 %@", values);
-//
-//  image = [UIImage imageNamed:@"loader-002.jpg" inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil];
-//  values = [[BSWDataModelHandler sharedInstance] runModelOnImage:image];
-//  NSLog(@"loader-002 %@", values);
-//
-//  image = [UIImage imageNamed:@"loader-003.jpg" inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil];
-//  values = [[BSWDataModelHandler sharedInstance] runModelOnImage:image];
-//  NSLog(@"loader-003 %@", values);
-//  
-//  image = [UIImage imageNamed:@"loader-004.jpg" inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil];
-//  values = [[BSWDataModelHandler sharedInstance] runModelOnImage:image];
-//  NSLog(@"loader-004 %@", values);
-//
-//  UIImage *image2 = [UIImage imageNamed:@"beer glass" inBundle:[NSBundle bundleForClass:[self class]] compatibleWithTraitCollection:nil];
-//  NSDictionary *values2 = [[BSWDataModelHandler sharedInstance] runModelOnImage:image2];
-//  NSLog(@"beer glass %@", values2);
-  
   NSError *error;
   NSData *screenshotData = [[XCUIDevice sharedDevice] fb_screenshotHighWithError:&error];
   if (nil == screenshotData) {
@@ -69,6 +50,18 @@
   }
   NSString *screenshot = [screenshotData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
   return FBResponseWithObject(screenshot);
+}
+
++ (id<FBResponsePayload>)handleGetScreenshotClassification:(FBRouteRequest *)request
+{  
+  NSError *error;
+  UIImage *image  = [[XCUIDevice sharedDevice] fb_screenshotImageWithError:&error];
+  if (nil == image) {
+    return FBResponseWithError(error);
+  }
+  NSDictionary *values = [[BSWDataModelHandler sharedInstance] runModelOnImage:image];
+  
+  return FBResponseWithObject(values);
 }
 
 @end

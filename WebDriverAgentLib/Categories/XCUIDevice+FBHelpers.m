@@ -147,6 +147,42 @@ static bool fb_isLocked;
   return result;
 }
 
+- (UIImage *)fb_screenshotImageWithError:(NSError*__autoreleasing*)error
+{
+
+  Class xcScreenClass = objc_lookUpClass("XCUIScreen");
+  if (nil == xcScreenClass) {
+    XCUIScreenshot *screenshotResult = [[XCAXClient_iOS sharedClient] screenshot];
+    
+    if (nil == screenshotResult) {
+      if (error) {
+        *error = [[FBErrorBuilder.builder withDescription:@"Cannot take a screenshot of the current screen state"] build];
+      }
+      return nil;
+    }
+    UIImage *screenImage = [screenshotResult image];
+    if (screenImage.size.height <= 1.0) {
+      return nil;
+    }
+    return screenImage;
+  }
+
+  XCUIScreen *mainScreen = (XCUIScreen* )[xcScreenClass mainScreen];
+  
+  @try {
+    XCUIScreenshot *screenshot = [mainScreen screenshot];
+    UIImage *screenImage = [screenshot image];
+    if (screenImage.size.height <= 1.0) {
+      return nil;
+    }
+    return screenImage;
+  }
+  @catch (NSException *exception) {
+    NSLog(@"failed to get screenshot: %@", exception);
+  }
+  return nil;
+}
+
 - (NSData *)fb_rawScreenshotWithQuality:(NSUInteger)quality rect:(CGRect)rect error:(NSError*__autoreleasing*)error
 {
   NSData *imageData = [XCUIScreen.mainScreen screenshotDataForQuality:quality rect:rect error:error];

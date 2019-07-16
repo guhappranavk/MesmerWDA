@@ -77,6 +77,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSData *)fb_screenshotHighWithError:(NSError*__autoreleasing*)error;
 
 /**
+ Returns screenshot image object
+ @param error If there is an error, upon return contains an NSError object that describes the problem.
+ @return Device screenshot image or nil in case of failure
+ */
+- (nullable UIImage *)fb_screenshotImageWithError:(NSError*__autoreleasing*)error;
+
+/**
  Returns device current wifi ip4 address
  */
 - (nullable NSString *)fb_wifiIPAddress;
