@@ -24,6 +24,7 @@
 #import "FBConfiguration.h"
 #import "FBLogger.h"
 #import "FBApplication.h"
+#import "BSWDataModelHandler.h"
 
 #import "XCUIDevice+FBHelpers.h"
 
@@ -115,6 +116,7 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
   
   [FBLogger logFmt:@"Appium WDA Version: %@", @"07.04.2019.1"];
   [self startTimedTask];
+  [[BSWDataModelHandler sharedInstance] loadModel:@"model" modelFileExtn:@"tflite" labels:@"labels" labelsFileExtn:@"txt"];
 }
 
 - (void)startTimedTask {
