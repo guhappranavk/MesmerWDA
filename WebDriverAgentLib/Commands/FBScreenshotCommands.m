@@ -59,7 +59,22 @@
   if (nil == image) {
     return FBResponseWithError(error);
   }
-  NSDictionary *values = [[BSWDataModelHandler sharedInstance] runModelOnImage:image];
+  NSDictionary *_values = [[BSWDataModelHandler sharedInstance] runModelOnImage:image];
+  NSMutableDictionary *values = [_values mutableCopy];
+  
+  double threshold = 0.501;
+  double loadingConfScore = ((NSNumber *)_values[@"loading"]).doubleValue;
+  double loadedConfScore = ((NSNumber *)_values[@"loaded"]).doubleValue;
+  
+  if (loadedConfScore > loadingConfScore && loadedConfScore > threshold) {
+    values[@"result"] = @"loaded";
+  }
+  else if (loadingConfScore > loadedConfScore && loadingConfScore > threshold) {
+    values[@"result"] = @"loading";
+  }
+  else {
+    values[@"result"] = @"UNKNOWN";
+  }
   
   return FBResponseWithObject(values);
 }
