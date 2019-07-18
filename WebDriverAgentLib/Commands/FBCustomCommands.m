@@ -218,13 +218,23 @@
   [app activate];
   
   if ([self tap:@"Reset Location & Privacy" app:app]) {
-    [self tap:@"Reset Warnings" app:app];
+    if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
+      [self tapButton:@"Reset" element:@"Reset Warnings" app:app];
+    }
+    else {
+      [self tap:@"Reset Warnings" app:app];
+    }
   }
   else {
     [self tap:@"General" app:app];
     [self tap:@"Reset" app:app];
     [self tap:@"Reset Location & Privacy" app:app];
-    [self tap:@"Reset Warnings" app:app];
+    if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
+      [self tapButton:@"Reset" element:@"Reset Warnings" app:app];
+    }
+    else {
+      [self tap:@"Reset Warnings" app:app];
+    }
   }
   return FBResponseWithOK();
 }
@@ -234,6 +244,21 @@
   if (elements.count > 0) {
     XCUIElement *element = elements[0];
     return [element fb_tapWithError:nil];
+  }
+  return NO;
+}
+
++ (BOOL)tapButton:(NSString *)name element:(NSString *)element app:(XCUIApplication *)app {
+  NSArray *elements = [FBFindElementCommands elementsUsing:@"id" withValue:element under:app shouldReturnAfterFirstMatch:NO];
+  if (elements.count > 0) {
+    NSArray *buttons = [elements[0] buttons].allElementsBoundByIndex;
+    for (XCUIElement *button in buttons) {
+      NSString *label = button.label;
+      if ([label caseInsensitiveCompare:name] == NSOrderedSame) {
+        [button tap];
+        return YES;
+      }
+    }
   }
   return NO;
 }
