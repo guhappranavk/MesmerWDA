@@ -124,6 +124,7 @@
   return appImpl;
 }
 
+/*
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *, id> *)change context:(void *)context
 {
   if (![keyPath isEqualToString:FBStringify(XCUIApplicationImpl, currentProcess)]) {
@@ -138,7 +139,29 @@
   }
   [object setValue:[FBApplicationProcessProxy proxyWithApplicationProcess:applicationProcess] forKey:keyPath];
 }
+*/
 
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *, id> *)change context:(void *)context
+{
+  if (object != self.fb_appImpl) {
+    return;
+  }
+  if (![keyPath isEqualToString:FBStringify(XCUIApplicationImpl, currentProcess)]) {
+    return;
+  }
+  if ([change[NSKeyValueChangeKindKey] unsignedIntegerValue] != NSKeyValueChangeSetting) {
+    return;
+  }
+  XCUIApplicationProcess *applicationProcess = change[NSKeyValueChangeNewKey];
+  if (!applicationProcess || [applicationProcess isProxy] || ![applicationProcess isMemberOfClass:XCUIApplicationProcess.class]) {
+    return;
+  }
+  dispatch_async(dispatch_get_main_queue(), ^{
+    // Dispatching this call out of KVO call stack will trigger additional KVO call,
+    // which is required in case there are already registered observers.
+    self.fb_appImpl.currentProcess = (XCUIApplicationProcess *)[FBApplicationProcessProxy proxyWithApplicationProcess:applicationProcess];
+  });
+}
 
 #pragma mark - Process registration
 
