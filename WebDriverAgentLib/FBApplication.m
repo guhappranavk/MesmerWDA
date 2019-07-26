@@ -124,6 +124,7 @@
   return appImpl;
 }
 
+//Commented out original implementation, as this took around 1 min to start up. Instead, see below.
 /*
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *, id> *)change context:(void *)context
 {
@@ -141,6 +142,7 @@
 }
 */
 
+//Implementation imported from record wda due to faster performance.
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *, id> *)change context:(void *)context
 {
   if (object != self.fb_appImpl) {
