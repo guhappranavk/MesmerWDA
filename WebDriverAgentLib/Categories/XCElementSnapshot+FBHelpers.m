@@ -17,6 +17,7 @@
 #import "XCTestPrivateSymbols.h"
 #import "XCUIElement.h"
 #import "XCUIElement+FBWebDriverAttributes.h"
+#import "FBXPath.h"
 
 inline static BOOL isSnapshotTypeAmongstGivenTypes(XCElementSnapshot* snapshot, NSArray<NSNumber *> *types);
 
@@ -27,6 +28,11 @@ inline static BOOL isSnapshotTypeAmongstGivenTypes(XCElementSnapshot* snapshot, 
   return [self descendantsByFilteringWithBlock:^BOOL(XCElementSnapshot *snapshot) {
     return snapshot.elementType == type;
   }];
+}
+
+- (NSArray<XCElementSnapshot *> *)fb_descendantsMatchingXPathQuery:(NSString *)xpathQuery
+{
+  return (NSArray<XCElementSnapshot *> *)[FBXPath findMatchesIn:self xpathQuery:xpathQuery];
 }
 
 - (XCElementSnapshot *)fb_parentMatchingType:(XCUIElementType)type

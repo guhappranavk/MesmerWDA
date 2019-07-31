@@ -106,6 +106,13 @@
 		ADBC39981D07842800327304 /* XCUIElementDouble.m in Sources */ = {isa = PBXBuildFile; fileRef = ADBC39971D07842800327304 /* XCUIElementDouble.m */; };
 		ADDA07241D6BB2BF001700AC /* FBScrollViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDA07231D6BB2BF001700AC /* FBScrollViewController.m */; };
 		ADEF63AF1D09DEBE0070A7E3 /* FBRuntimeUtilsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = ADEF63AE1D09DEBE0070A7E3 /* FBRuntimeUtilsTests.m */; };
+		DA6293AA22F1A013005E680B /* NSRunLoop+SRWebSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = DA6293A322F1A013005E680B /* NSRunLoop+SRWebSocket.h */; };
+		DA6293AB22F1A013005E680B /* NSURLRequest+SRWebSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = DA6293A422F1A013005E680B /* NSURLRequest+SRWebSocket.h */; };
+		DA6293AC22F1A013005E680B /* SRSecurityPolicy.h in Headers */ = {isa = PBXBuildFile; fileRef = DA6293A522F1A013005E680B /* SRSecurityPolicy.h */; };
+		DA6293AD22F1A013005E680B /* SRWebSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = DA6293A622F1A013005E680B /* SRWebSocket.h */; };
+		DA6293AE22F1A014005E680B /* SocketRocket.h in Headers */ = {isa = PBXBuildFile; fileRef = DA6293A722F1A013005E680B /* SocketRocket.h */; };
+		DA6293AF22F1A014005E680B /* libSocketRocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DA6293A822F1A013005E680B /* libSocketRocket.a */; };
+		DA6293B022F1A014005E680B /* libSocketRocketSim.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DA6293A922F1A013005E680B /* libSocketRocketSim.a */; };
 		E456BF73206BC17F00963F9F /* YYCache.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E456BF72206BC17F00963F9F /* YYCache.framework */; };
 		EE006EAD1EB99B15006900A4 /* FBElementVisibilityTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EE006EAC1EB99B15006900A4 /* FBElementVisibilityTests.m */; };
 		EE006EB01EBA1AA9006900A4 /* XCElementSnapshot+FBHitPoint.h in Headers */ = {isa = PBXBuildFile; fileRef = EE006EAE1EBA1AA9006900A4 /* XCElementSnapshot+FBHitPoint.h */; };
@@ -551,6 +558,13 @@
 		ADDA07221D6BB2BF001700AC /* FBScrollViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBScrollViewController.h; sourceTree = "<group>"; };
 		ADDA07231D6BB2BF001700AC /* FBScrollViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBScrollViewController.m; sourceTree = "<group>"; };
 		ADEF63AE1D09DEBE0070A7E3 /* FBRuntimeUtilsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBRuntimeUtilsTests.m; sourceTree = "<group>"; };
+		DA6293A322F1A013005E680B /* NSRunLoop+SRWebSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSRunLoop+SRWebSocket.h"; sourceTree = "<group>"; };
+		DA6293A422F1A013005E680B /* NSURLRequest+SRWebSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLRequest+SRWebSocket.h"; sourceTree = "<group>"; };
+		DA6293A522F1A013005E680B /* SRSecurityPolicy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SRSecurityPolicy.h; sourceTree = "<group>"; };
+		DA6293A622F1A013005E680B /* SRWebSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SRWebSocket.h; sourceTree = "<group>"; };
+		DA6293A722F1A013005E680B /* SocketRocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocketRocket.h; sourceTree = "<group>"; };
+		DA6293A822F1A013005E680B /* libSocketRocket.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libSocketRocket.a; sourceTree = "<group>"; };
+		DA6293A922F1A013005E680B /* libSocketRocketSim.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libSocketRocketSim.a; sourceTree = "<group>"; };
 		E456BF72206BC17F00963F9F /* YYCache.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = YYCache.framework; path = Carthage/Build/iOS/YYCache.framework; sourceTree = "<group>"; };
 		EE006EAC1EB99B15006900A4 /* FBElementVisibilityTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBElementVisibilityTests.m; sourceTree = "<group>"; };
 		EE006EAE1EBA1AA9006900A4 /* XCElementSnapshot+FBHitPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XCElementSnapshot+FBHitPoint.h"; sourceTree = "<group>"; };
@@ -837,8 +851,10 @@
 				AD35D0641CF1C2C300870A75 /* RoutingHTTPServer.framework in Frameworks */,
 				710181F8211DF584002FD3A8 /* CocoaAsyncSocket.framework in Frameworks */,
 				E456BF73206BC17F00963F9F /* YYCache.framework in Frameworks */,
+				DA6293B022F1A014005E680B /* libSocketRocketSim.a in Frameworks */,
 				25BD14F322D80B720097DE12 /* tensorflow_lite.framework in Frameworks */,
 				EEEA70152110605600C8ADE3 /* XCTest.framework in Frameworks */,
+				DA6293AF22F1A014005E680B /* libSocketRocket.a in Frameworks */,
 				EEEA70152110605600C8ADE2 /* XCTAutomationSupport.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -928,6 +944,7 @@
 		91F9DAE01B99DBC2001349B2 = {
 			isa = PBXGroup;
 			children = (
+				DA6293A122F1A013005E680B /* SocketRocket */,
 				EEE5CABE1C80361500CBBDD9 /* Configurations */,
 				91F9DB731B99DDD8001349B2 /* PrivateHeaders */,
 				498495C81BB2E6FA009CC848 /* Resources */,
@@ -999,6 +1016,28 @@
 				EE8980D321105B49001789ED /* XCTAutomationSupport.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DA6293A122F1A013005E680B /* SocketRocket */ = {
+			isa = PBXGroup;
+			children = (
+				DA6293A222F1A013005E680B /* include */,
+				DA6293A822F1A013005E680B /* libSocketRocket.a */,
+				DA6293A922F1A013005E680B /* libSocketRocketSim.a */,
+			);
+			path = SocketRocket;
+			sourceTree = "<group>";
+		};
+		DA6293A222F1A013005E680B /* include */ = {
+			isa = PBXGroup;
+			children = (
+				DA6293A322F1A013005E680B /* NSRunLoop+SRWebSocket.h */,
+				DA6293A422F1A013005E680B /* NSURLRequest+SRWebSocket.h */,
+				DA6293A522F1A013005E680B /* SRSecurityPolicy.h */,
+				DA6293A622F1A013005E680B /* SRWebSocket.h */,
+				DA6293A722F1A013005E680B /* SocketRocket.h */,
+			);
+			path = include;
 			sourceTree = "<group>";
 		};
 		EE9AB73E1CAEDF0C008C271F /* Categories */ = {
@@ -1508,7 +1547,9 @@
 				EE35AD541E3B77D600A02D78 /* XCTestProbe.h in Headers */,
 				EE35AD281E3B77D600A02D78 /* XCApplicationQuery.h in Headers */,
 				EE35AD3C1E3B77D600A02D78 /* XCTAsyncActivity.h in Headers */,
+				DA6293AE22F1A014005E680B /* SocketRocket.h in Headers */,
 				EE35AD501E3B77D600A02D78 /* XCTestMisuseObserver.h in Headers */,
+				DA6293AA22F1A013005E680B /* NSRunLoop+SRWebSocket.h in Headers */,
 				EE35AD601E3B77D600A02D78 /* XCTRunnerDaemonSession.h in Headers */,
 				EE158AF51CBD456F00A3E3F0 /* FBApplication.h in Headers */,
 				EE35AD4B1E3B77D600A02D78 /* XCTestExpectationWaiter.h in Headers */,
@@ -1595,6 +1636,7 @@
 				715557D3211DBCE700613B26 /* FBTCPSocket.h in Headers */,
 				71B49EC71ED1A58100D51AD6 /* XCUIElement+FBUID.h in Headers */,
 				EE35AD381E3B77D600A02D78 /* XCSymbolicationRecord.h in Headers */,
+				DA6293AB22F1A013005E680B /* NSURLRequest+SRWebSocket.h in Headers */,
 				EE35AD6E1E3B77D600A02D78 /* XCUIDevice.h in Headers */,
 				71BD20731F86116100B36EC2 /* XCUIApplication+FBTouchAction.h in Headers */,
 				EE158ACE1CBD456F00A3E3F0 /* FBCommandHandler.h in Headers */,
@@ -1618,6 +1660,7 @@
 				714097431FAE1B0B008FB2C5 /* FBBaseActionsSynthesizer.h in Headers */,
 				AD6C26941CF2379700F8B5FF /* FBAlert.h in Headers */,
 				EE35AD731E3B77D600A02D78 /* XCUIElementQuery.h in Headers */,
+				DA6293AD22F1A013005E680B /* SRWebSocket.h in Headers */,
 				EE35AD331E3B77D600A02D78 /* XCPointerEvent.h in Headers */,
 				EE35AD351E3B77D600A02D78 /* XCSourceCodeRecording.h in Headers */,
 				EEE9B4721CD02B88009D2030 /* FBRunLoopSpinner.h in Headers */,
@@ -1628,6 +1671,7 @@
 				EE35AD101E3B77D600A02D78 /* _XCTestObservationCenterImplementation.h in Headers */,
 				AD6C26981CF2481700F8B5FF /* XCUIDevice+FBHelpers.h in Headers */,
 				71A7EAF91E224648001DA4F2 /* FBClassChainQueryParser.h in Headers */,
+				DA6293AC22F1A013005E680B /* SRSecurityPolicy.h in Headers */,
 				EE9B76AA1CF7A43900275851 /* FBMacros.h in Headers */,
 				EE35AD4A1E3B77D600A02D78 /* XCTestExpectationDelegate-Protocol.h in Headers */,
 				EE35AD641E3B77D600A02D78 /* XCTUIApplicationMonitor-Protocol.h in Headers */,
@@ -2305,6 +2349,10 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/SocketRocket",
+				);
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-isystem",
@@ -2376,6 +2424,10 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/SocketRocket",
+				);
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-isystem",

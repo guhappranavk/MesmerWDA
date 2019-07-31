@@ -53,12 +53,17 @@ static id<FBResponsePayload> FBNoSuchElementErrorResponseForRequest(FBRouteReque
 
 #pragma mark - Commands
 
+static NSString *const PREFERRED_SEARCH_STRATEGY_FB_WDA = @"fbwda";
+
 + (id<FBResponsePayload>)handleFindElement:(FBRouteRequest *)request
 {
+  NSString *preferredStrategy = request.parameters[@"preferredStrategy"] ?: @"";
+  
   FBSession *session = request.session;
   XCUIElement *element = [self.class elementUsing:request.arguments[@"using"]
                                         withValue:request.arguments[@"value"]
-                                            under:session.activeApplication];
+                                            under:session.activeApplication
+                           usingPreferredStrategy:preferredStrategy];
   if (!element) {
     return FBNoSuchElementErrorResponseForRequest(request);
   }
@@ -122,13 +127,28 @@ static id<FBResponsePayload> FBNoSuchElementErrorResponseForRequest(FBRouteReque
 
 + (XCUIElement *)elementUsing:(NSString *)usingText withValue:(NSString *)value under:(XCUIElement *)element
 {
+  return [self elementUsing:usingText withValue:value under:element usingPreferredStrategy:@""];
+}
+
++ (XCUIElement *)elementUsing:(NSString *)usingText withValue:(NSString *)value under:(XCUIElement *)element usingPreferredStrategy:(NSString *)strategy
+{
   return [[self elementsUsing:usingText
                     withValue:value
                         under:element
-  shouldReturnAfterFirstMatch:YES] firstObject];
+  shouldReturnAfterFirstMatch:YES
+       usingPreferredStrategy:strategy] firstObject];
 }
 
 + (NSArray *)elementsUsing:(NSString *)usingText withValue:(NSString *)value under:(XCUIElement *)element shouldReturnAfterFirstMatch:(BOOL)shouldReturnAfterFirstMatch
+{
+  return [self elementsUsing:usingText
+                   withValue:value
+                       under:element
+ shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch
+      usingPreferredStrategy:@""];
+}
+
++ (NSArray *)elementsUsing:(NSString *)usingText withValue:(NSString *)value under:(XCUIElement *)element shouldReturnAfterFirstMatch:(BOOL)shouldReturnAfterFirstMatch usingPreferredStrategy:(NSString *)strategy
 {
   NSArray *elements;
   const BOOL partialSearch = [usingText isEqualToString:@"partial link text"];
@@ -143,7 +163,14 @@ static id<FBResponsePayload> FBNoSuchElementErrorResponseForRequest(FBRouteReque
   } else if ([usingText isEqualToString:@"class chain"]) {
     elements = [element fb_descendantsMatchingClassChain:value shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch];
   } else if ([usingText isEqualToString:@"xpath"]) {
-    elements = [element fb_descendantsMatchingXPathQuery:value shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch];
+    
+    if ([strategy caseInsensitiveCompare:PREFERRED_SEARCH_STRATEGY_FB_WDA] == NSOrderedSame) {
+      elements = [element fb_wda_descendantsMatchingXPathQuery:value shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch];
+    }
+    else {
+      elements = [element fb_descendantsMatchingXPathQuery:value shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch];
+    }
+    
   } else if ([usingText isEqualToString:@"predicate string"]) {
     NSPredicate *predicate = [FBPredicate predicateWithFormat:value];
     elements = [element fb_descendantsMatchingPredicate:predicate shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch];

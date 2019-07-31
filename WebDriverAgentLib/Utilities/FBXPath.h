@@ -66,6 +66,15 @@ extern NSString *const FBXPathQueryEvaluationException;
 + (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point;
 + (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point maxCells:(NSInteger)maxCells;
 
+/**
+ Returns an array of descendants matching given xpath query
+ 
+ @param root the root element to execute XPath query for
+ @param xpathQuery requested xpath query
+ @return an array of descendants matching given xpath query
+ */
++ (nullable NSArray<XCElementSnapshot *> *)findMatchesIn:(XCElementSnapshot *)root xpathQuery:(NSString *)xpathQuery;
+
 @end
 
 NS_ASSUME_NONNULL_END

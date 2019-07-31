@@ -110,6 +110,14 @@
 
 #pragma mark - Search by xpath
 
+- (NSArray<XCElementSnapshot *> *)getMatchedSnapshotsByXPathQuery:(NSString *)xpathQuery
+{
+  // XPath will try to match elements only class name, so requesting elements by XCUIElementTypeAny will not work. We should use '*' instead.
+  xpathQuery = [xpathQuery stringByReplacingOccurrencesOfString:@"XCUIElementTypeAny" withString:@"*"];
+  [self fb_waitUntilSnapshotIsStable];
+  return [self.fb_lastSnapshot fb_descendantsMatchingXPathQuery:xpathQuery];
+}
+
 - (NSArray<XCUIElement *> *)fb_descendantsMatchingXPathQuery:(NSString *)xpathQuery shouldReturnAfterFirstMatch:(BOOL)shouldReturnAfterFirstMatch
 {
   // XPath will try to match elements only class name, so requesting elements by XCUIElementTypeAny will not work. We should use '*' instead.
@@ -125,6 +133,19 @@
   return [self fb_filterDescendantsWithSnapshots:matchingSnapshots];
 }
 
+//Implementation of fb_descendantsMatchingXPathQuery ported from Record WDA.
+- (NSArray<XCUIElement *> *)fb_wda_descendantsMatchingXPathQuery:(NSString *)xpathQuery shouldReturnAfterFirstMatch:(BOOL)shouldReturnAfterFirstMatch
+{
+  NSArray *matchingSnapshots = [self getMatchedSnapshotsByXPathQuery:xpathQuery];
+  if (0 == [matchingSnapshots count]) {
+    return @[];
+  }
+  if (shouldReturnAfterFirstMatch) {
+    XCElementSnapshot *snapshot = matchingSnapshots.firstObject;
+    matchingSnapshots = @[snapshot];
+  }
+  return [self fb_filterDescendantsWithSnapshots:matchingSnapshots];
+}
 
 #pragma mark - Search by Accessibility Id
 

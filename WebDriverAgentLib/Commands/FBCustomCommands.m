@@ -29,6 +29,7 @@
 #import "XCUIElement+FBIsVisible.h"
 #import "XCUIElementQuery.h"
 #import "FBFindElementCommands.h"
+#import "SocketRocket.h"
 
 @implementation FBCustomCommands
 
@@ -54,7 +55,9 @@
     [[FBRoute POST:@"/wda/getPasteboard"] respondWithTarget:self action:@selector(handleGetPasteboard:)],
     [[FBRoute GET:@"/wda/batteryInfo"] respondWithTarget:self action:@selector(handleGetBatteryInfo:)],
     [[FBRoute POST:@"/wda/pressButton"] respondWithTarget:self action:@selector(handlePressButtonCommand:)],
-    [[FBRoute POST:@"/wda/resetLocation"].withoutSession respondWithTarget:self action:@selector(handleResetLocationCommand:)]
+    [[FBRoute POST:@"/wda/resetLocation"].withoutSession respondWithTarget:self action:@selector(handleResetLocationCommand:)],
+    [[FBRoute POST:@"/screenCast"].withoutSession respondWithTarget:self action:@selector(handleScreenCast:)],
+    [[FBRoute POST:@"/stopScreenCast"].withoutSession respondWithTarget:self action:@selector(handleStopScreenCast:)]
   ];
 }
 
@@ -261,6 +264,72 @@
     }
   }
   return NO;
+}
+
+static NSTimer *kTimer = nil;
+static SRWebSocket *kSRWebSocket;
+static NSData *kLastImageData;
+
++ (id<FBResponsePayload>)handleScreenCast:(FBRouteRequest *)request
+{
+  NSInteger fps = [request.arguments[@"fps"] integerValue];
+  NSString *url = request.arguments[@"url"];
+  
+  if (fps <= 0) {
+    fps = 10;
+  }
+  if (url == nil) {
+    return FBResponseWithObject(@"Missing URL");
+  }
+  
+  if (kTimer != nil) {
+    [kTimer invalidate];
+  }
+  if (kSRWebSocket != nil) {
+    [kSRWebSocket close];
+  }
+  
+  NSURL *nsURL = [NSURL URLWithString:url];
+  kSRWebSocket = [[SRWebSocket alloc] initWithURL:nsURL securityPolicy:[SRSecurityPolicy defaultPolicy]];
+  [kSRWebSocket open];
+  kTimer = [NSTimer scheduledTimerWithTimeInterval:1/fps target:self selector:@selector(performScreenCast:) userInfo:nil repeats:YES];
+  return FBResponseWithOK();
+}
+
++ (id<FBResponsePayload>)handleStopScreenCast:(FBRouteRequest *)request
+{
+  if (kTimer != nil) {
+    [kTimer invalidate];
+    kTimer = nil;
+  }
+  if (kSRWebSocket != nil) {
+    [kSRWebSocket close];
+  }
+  kLastImageData = nil;
+  return FBResponseWithOK();
+}
+
++ (void)performScreenCast:(NSTimer*)timer {
+  //  dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+  NSError *error = nil;
+  NSData *screenshotData = [[XCUIDevice sharedDevice] fb_screenshotHighWithError:&error quality:0.0 type:@"jpeg"];
+  if (screenshotData != nil && error == nil) {
+    if ([kLastImageData isEqualToData:screenshotData]) {
+      return;
+    }
+    kLastImageData = screenshotData;
+    [kSRWebSocket sendData:screenshotData error:&error];
+    if (error) {
+      NSLog(@"Error sending screenshot: %@", error);
+    }
+    else {
+      //log the time it took to transport
+    }
+  }
+  else {
+    NSLog(@"Error taking screenshot: %@", error == nil ? @"Unknown error" : error);
+  }
+  //  });
 }
 
 @end

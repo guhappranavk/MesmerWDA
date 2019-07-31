@@ -183,6 +183,49 @@ static bool fb_isLocked;
   return nil;
 }
 
+- (NSData *)fb_screenshotHighWithError:(NSError*__autoreleasing*)error quality:(double)quality type:(NSString *)type
+{
+  Class xcScreenClass = objc_lookUpClass("XCUIScreen");
+  if (nil == xcScreenClass) {
+    NSData *result = [[XCAXClient_iOS sharedClient] screenshotData];
+    if (nil == result) {
+      if (error) {
+        *error = [[FBErrorBuilder.builder withDescription:@"Cannot take a screenshot of the current screen state"] build];
+      }
+      return nil;
+    }
+    return result;
+  }
+  
+  //  XCUIApplication *app = FBApplication.fb_activeApplication;
+  //  CGSize screenSize = FBAdjustDimensionsForApplication(app.frame.size, app.interfaceOrientation);
+  //  NSUInteger quality = 0;
+  //  CGRect screenRect = CGRectMake(0, 0, screenSize.width, screenSize.height);
+  //
+  XCUIScreen *mainScreen = (XCUIScreen *)[xcScreenClass mainScreen];
+  //  return [mainScreen screenshotDataForQuality:quality rect:screenRect error:error];
+  
+  NSData *result = nil;
+  
+  @try {
+    XCUIScreenshot *screenshot = [mainScreen screenshot];
+    if (type == nil || [type caseInsensitiveCompare:@"jpeg"] == NSOrderedSame) {
+      UIImage *screenImage = [screenshot image];
+      if (screenImage.size.height <= 1.0) {
+        return nil;
+      }
+      result = UIImageJPEGRepresentation(screenImage, (CGFloat)quality);
+    }
+    else {
+      result = [screenshot PNGRepresentation];
+    }
+  }
+  @catch (NSException *exception) {
+    NSLog(@"failed to get screenshot: %@", exception);
+  }
+  return result;
+}
+
 - (NSData *)fb_rawScreenshotWithQuality:(NSUInteger)quality rect:(CGRect)rect error:(NSError*__autoreleasing*)error
 {
   NSData *imageData = [XCUIScreen.mainScreen screenshotDataForQuality:quality rect:rect error:error];

@@ -47,6 +47,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (NSArray<XCUIElement *> *)fb_descendantsMatchingXPathQuery:(NSString *)xpathQuery shouldReturnAfterFirstMatch:(BOOL)shouldReturnAfterFirstMatch;
 
+- (NSArray<XCUIElement *> *)fb_wda_descendantsMatchingXPathQuery:(NSString *)xpathQuery shouldReturnAfterFirstMatch:(BOOL)shouldReturnAfterFirstMatch;
+
 /**
  Returns an array of descendants matching given predicate.
  Allowed property names are only these declared in FBElement protocol (property names are received in runtime)
