@@ -152,8 +152,12 @@
   return FBResponseWithStatus(FBCommandStatusNoError, type);
 }
 
+static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
+
 + (id<FBResponsePayload>)handleSetValue:(FBRouteRequest *)request
 {
+  NSString *preferredStrategy = request.parameters[@"preferredStrategy"] ?: @"";
+  
   FBElementCache *elementCache = request.session.elementCache;
   NSString *elementUUID = request.parameters[@"uuid"];
   XCUIElement *element = [elementCache elementForUUID:elementUUID];
@@ -179,9 +183,18 @@
   }
   NSUInteger frequency = (NSUInteger)[request.arguments[@"frequency"] longLongValue] ?: [FBConfiguration maxTypingFrequency];
   NSError *error = nil;
-  if (![element fb_typeText:textToType frequency:frequency error:&error]) {
-    return FBResponseWithError(error);
+  
+  if ([preferredStrategy caseInsensitiveCompare:PREFERRED_TYPE_STRATEGY_FB_WDA] == NSOrderedSame) {
+    if (![element fb_wda_typeText:textToType frequency:frequency error:&error]) {
+      return FBResponseWithError(error);
+    }
   }
+  else {
+    if (![element fb_typeText:textToType frequency:frequency error:&error]) {
+      return FBResponseWithError(error);
+    }
+  }
+  
   return FBResponseWithElementUUID(elementUUID);
 }
 

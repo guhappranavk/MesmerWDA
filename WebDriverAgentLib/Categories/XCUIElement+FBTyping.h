@@ -34,6 +34,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)fb_typeText:(NSString *)text frequency:(NSUInteger)frequency error:(NSError **)error;
 
+- (BOOL)fb_wda_typeText:(NSString *)text frequency:(NSUInteger)frequency error:(NSError **)error;
+
 /**
  Clears text on element.
  It will try to activate keyboard on element, if element has no keyboard focus.

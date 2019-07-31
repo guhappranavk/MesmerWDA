@@ -57,6 +57,20 @@
   return YES;
 }
 
+//Implementation of
+//- (BOOL)fb_typeText:(NSString *)text frequency:(NSUInteger)frequency error:(NSError **)error
+//ported from record WDA.
+- (BOOL)fb_wda_typeText:(NSString *)text frequency:(NSUInteger)frequency error:(NSError **)error
+{
+  if (!self.hasKeyboardFocus && ![self fb_tapWithError:error]) {
+    return NO;
+  }
+  if (![FBKeyboard typeText:text frequency:frequency error:error]) {
+    return NO;
+  }
+  return YES;
+}
+
 - (BOOL)fb_clearTextWithError:(NSError **)error
 {
   if (0 == [self.value fb_visualLength]) {
