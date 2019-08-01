@@ -114,7 +114,7 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
   }
   [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
   
-  [FBLogger logFmt:@"Appium WDA Version: %@", @"07.26.2019.1"];
+  [FBLogger logFmt:@"Appium WDA Version: %@", @"08.01.2019.1"];
   [self startTimedTask];
   [[BSWDataModelHandler sharedInstance] loadModel:@"model" modelFileExtn:@"tflite" labels:@"labels" labelsFileExtn:@"txt"];
 }
@@ -123,6 +123,28 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
   [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(performBackgroundTask) userInfo:nil repeats:YES];
 }
 
+//Implementation ported from Record WDA
+//See original implementation below.
+- (void)performBackgroundTask {
+  static UIInterfaceOrientation deviceOrientation;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    deviceOrientation = [[FBApplication fb_activeApplication] interfaceOrientation];
+    NSLog(@"MESMER: Device Orientaion is %@", UIInterfaceOrientationIsPortrait(deviceOrientation) ? @"Portrait" : @"Landscape");
+  });
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
+      UIInterfaceOrientation orientation = [[FBApplication fb_activeApplication] interfaceOrientation];
+      if (orientation != deviceOrientation) {
+        deviceOrientation = orientation;
+        NSLog(@"MESMER: Device Orientaion changed to %@", UIInterfaceOrientationIsPortrait(deviceOrientation) ? @"Portrait" : @"Landscape");
+      }
+    });
+  });
+}
+
+//Original Implementation.
+/*
 - (void)performBackgroundTask {
   static UIDeviceOrientation deviceOrientation;
   static dispatch_once_t onceToken;
@@ -140,6 +162,7 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
     });
   });
 }
+*/
 
 - (void)initScreenshotsBroadcaster
 {
