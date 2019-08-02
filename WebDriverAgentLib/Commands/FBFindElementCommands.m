@@ -22,6 +22,7 @@
 #import "XCUIElement+FBClassChain.h"
 #import "XCUIElement+FBFind.h"
 #import "XCUIElement+FBIsVisible.h"
+#import "FBLogger.h"
 
 static id<FBResponsePayload> FBNoSuchElementErrorResponseForRequest(FBRouteRequest *request)
 {
@@ -58,6 +59,9 @@ static NSString *const PREFERRED_SEARCH_STRATEGY_FB_WDA = @"fbwda";
 + (id<FBResponsePayload>)handleFindElement:(FBRouteRequest *)request
 {
   NSString *preferredStrategy = request.parameters[@"preferredStrategy"] ?: @"";
+  if (preferredStrategy.length > 0) {
+    [FBLogger logFmt:@"handleFindElement received request with preferredStrategy: %@", preferredStrategy];
+  }
   
   FBSession *session = request.session;
   XCUIElement *element = [self.class elementUsing:request.arguments[@"using"]
@@ -165,6 +169,8 @@ static NSString *const PREFERRED_SEARCH_STRATEGY_FB_WDA = @"fbwda";
   } else if ([usingText isEqualToString:@"xpath"]) {
     
     if ([strategy caseInsensitiveCompare:PREFERRED_SEARCH_STRATEGY_FB_WDA] == NSOrderedSame) {
+      
+      [FBLogger logFmt:@"findElement using preferredStrategy: %@", strategy];
       elements = [element fb_wda_descendantsMatchingXPathQuery:value shouldReturnAfterFirstMatch:shouldReturnAfterFirstMatch];
     }
     else {

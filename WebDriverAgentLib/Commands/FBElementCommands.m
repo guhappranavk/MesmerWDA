@@ -157,6 +157,9 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
 + (id<FBResponsePayload>)handleSetValue:(FBRouteRequest *)request
 {
   NSString *preferredStrategy = request.parameters[@"preferredStrategy"] ?: @"";
+  if (preferredStrategy.length > 0) {
+    [FBLogger logFmt:@"handleSetValue received request with preferredStrategy: %@", preferredStrategy];
+  }
   
   FBElementCache *elementCache = request.session.elementCache;
   NSString *elementUUID = request.parameters[@"uuid"];
@@ -185,6 +188,9 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   NSError *error = nil;
   
   if ([preferredStrategy caseInsensitiveCompare:PREFERRED_TYPE_STRATEGY_FB_WDA] == NSOrderedSame) {
+    
+    [FBLogger logFmt:@"handleSetValue using preferredStrategy: %@", preferredStrategy];
+    
     if (![element fb_wda_typeText:textToType frequency:frequency error:&error]) {
       return FBResponseWithError(error);
     }
