@@ -17,7 +17,7 @@
 #import "XCElementSnapshot.h"
 
 static NSUInteger const DefaultStartingPort = 8100;
-static NSUInteger const DefaultMjpegServerPort = 9100;
+static NSUInteger const DefaultMjpegServerPort = 9110;
 static NSUInteger const DefaultPortRange = 100;
 
 static BOOL FBShouldUseTestManagerForVisibilityDetection = NO;
