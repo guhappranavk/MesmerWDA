@@ -377,17 +377,23 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     velocity = 1500;
   }
   
+  [self drag2:startPoint endPoint:endPoint duration:duration velocity:velocity];
+  return FBResponseWithOK();
+}
+
++ (void)drag2:(CGPoint)startPoint endPoint:(CGPoint)endPoint duration:(double)duration velocity:(double)velocity {
+  XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
   NSObject *lock = [NSObject new];
   __block BOOL isHandlerCalled = NO;
   
   XCEventGenerator * eventGenerator = [XCEventGenerator sharedGenerator];
   [eventGenerator pressAtPoint:startPoint forDuration:duration liftAtPoint:endPoint velocity:velocity orientation:app.interfaceOrientation
                           name:nil handler:^(XCSynthesizedEventRecord *record, NSError *error) {
-                            NSLog(@"handleDragCoordinate2 Error: %@", error);
-                            @synchronized(lock) {
-                              isHandlerCalled = YES;
-                            }
-                          }];
+    NSLog(@"handleDragCoordinate2 Error: %@", error);
+    @synchronized(lock) {
+      isHandlerCalled = YES;
+    }
+  }];
   
   while(true) {
     @synchronized(lock) {
@@ -399,7 +405,6 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     //Keep the run loop running, so this thread isn't blocked.
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow:1]];
   }
-  return FBResponseWithOK();
 }
 
 + (id<FBResponsePayload>)handleDrag:(FBRouteRequest *)request
@@ -542,10 +547,15 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     }
   }
     
-  XCUICoordinate *tapCoordinate = [self.class gestureCoordinateWithCoordinate:tapPoint application:request.session.activeApplication shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
-  [tapCoordinate tap];
+  
+  [self tapCoordinate:application tapPoint:tapPoint];
   
   return FBResponseWithOK();
+}
+
++ (void)tapCoordinate:(FBApplication *)application tapPoint:(CGPoint)tapPoint {
+  XCUICoordinate *tapCoordinate = [self.class gestureCoordinateWithCoordinate:tapPoint application:application shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
+  [tapCoordinate tap];
 }
 
 + (id<FBResponsePayload>)handlePinch:(FBRouteRequest *)request
@@ -696,4 +706,198 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
   return [[XCUICoordinate alloc] initWithCoordinate:appCoordinate pointsOffset:CGVectorMake(coordinate.x, coordinate.y)];
 }
 
++ (id<FBResponsePayload>)handleFindAndTap:(FBRouteRequest *)request
+{
+//  CGFloat x = [request.arguments[@"x"] doubleValue];
+//  CGFloat y = [request.arguments[@"y"] doubleValue];
+//  CGFloat width = [request.arguments[@"width"] doubleValue];
+//  CGFloat height = [request.arguments[@"height"] doubleValue];
+  NSString *type = request.arguments[@"type"];
+  NSString *query = request.arguments[@"query"];
+  NSString *queryValue = request.arguments[@"queryValue"];
+  FBApplication *application = [FBApplication fb_activeApplication];
+  
+  NSArray *alerts = [[application alerts] allElementsBoundByIndex];
+  if (alerts.count > 0 && queryValue != nil) {
+    XCUIElement *alert = alerts[0];
+    NSArray *buttons = [[alert buttons] allElementsBoundByIndex];
+    for (XCUIElement *button in buttons) {
+      if ([button.label caseInsensitiveCompare:queryValue] == NSOrderedSame) {
+        [button tap];
+        return FBResponseWithStatus(FBCommandStatusNoError, @{@"tapTime" : @([[NSDate date] timeIntervalSince1970])});
+      }
+    }
+  }
+  
+  return [self findAndTap:application type:type query:query queryValue:queryValue useButtonTap:NO];
+}
+
++ (XCUIElementType)elementTypeFromName:(NSString *)name {
+  static NSDictionary<NSString *, NSNumber *> *typeToNameDict;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    typeToNameDict = @{
+                       @"Any" : @0,
+                       @"Other" : @1,
+                       @"Application" : @2,
+                       @"Group" : @3,
+                       @"Window" : @4,
+                       @"Sheet" : @5,
+                       @"Drawer" : @6,
+                       @"Alert" : @7,
+                       @"Dialog" : @8,
+                       @"Button" : @9,
+                       @"RadioButton" : @10,
+                       @"RadioGroup" : @11,
+                       @"CheckBox" : @12,
+                       @"DisclosureTriangle" : @13,
+                       @"PopUpButton" : @14,
+                       @"ComboBox" : @15,
+                       @"MenuButton" : @16,
+                       @"ToolbarButton" : @17,
+                       @"Popover" : @18,
+                       @"Keyboard" : @19,
+                       @"Key" : @20,
+                       @"NavigationBar" : @21,
+                       @"TabBar" : @22,
+                       @"TabGroup" : @23,
+                       @"Toolbar" : @24,
+                       @"StatusBar" : @25,
+                       @"Table" : @26,
+                       @"TableRow" : @27,
+                       @"TableColumn" : @28,
+                       @"Outline" : @29,
+                       @"OutlineRow" : @30,
+                       @"Browser" : @31,
+                       @"CollectionView" : @32,
+                       @"Slider" : @33,
+                       @"PageIndicator" : @34,
+                       @"ProgressIndicator" : @35,
+                       @"ActivityIndicator" : @36,
+                       @"SegmentedControl" : @37,
+                       @"Picker" : @38,
+                       @"PickerWheel" : @39,
+                       @"Switch" : @40,
+                       @"Toggle" : @41,
+                       @"Link" : @42,
+                       @"Image" : @43,
+                       @"Icon" : @44,
+                       @"SearchField" : @45,
+                       @"ScrollView" : @46,
+                       @"ScrollBar" : @47,
+                       @"StaticText" : @48,
+                       @"TextField" : @49,
+                       @"SecureTextField" : @50,
+                       @"DatePicker" : @51,
+                       @"TextView" : @52,
+                       @"Menu" : @53,
+                       @"MenuItem" : @54,
+                       @"MenuBar" : @55,
+                       @"MenuBarItem" : @56,
+                       @"Map" : @57,
+                       @"WebView" : @58,
+                       @"IncrementArrow" : @59,
+                       @"DecrementArrow" : @60,
+                       @"Timeline" : @61,
+                       @"RatingIndicator" : @62,
+                       @"ValueIndicator" : @63,
+                       @"SplitGroup" : @64,
+                       @"Splitter" : @65,
+                       @"RelevanceIndicator" : @66,
+                       @"ColorWell" : @67,
+                       @"HelpTag" : @68,
+                       @"Matte" : @69,
+                       @"DockItem" : @70,
+                       @"Ruler" : @71,
+                       @"RulerMarker" : @72,
+                       @"Grid" : @73,
+                       @"LevelIndicator" : @74,
+                       @"Cell" : @75,
+                       @"LayoutArea" : @76,
+                       @"LayoutItem" : @77,
+                       @"Handle" : @78,
+                       @"Stepper" : @79,
+                       @"Tab" : @80,
+                       @"TouchBar" : @81,
+                       @"StatusItem" : @82
+                       };
+  });
+  
+  NSNumber *ret = [typeToNameDict objectForKey:name];
+  if (ret == nil) {
+    return -1;
+  }
+  return [ret integerValue];
+}
+
++ (id<FBResponsePayload>)findAndTap:(FBApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue useButtonTap:(BOOL)useButtonTap {
+  if (type == nil) {
+    return FBResponseWithErrorFormat(@"type is missing");
+  }
+  
+  XCUIElementType elementType = [self elementTypeFromName:type];
+  if (elementType == (XCUIElementType)-1) {
+    return FBResponseWithErrorFormat(@"Type %@ is invalid", type);
+  }
+  
+  //  if (elementType != XCUIElementTypeOther) {
+  //    NSArray <XCUIElement *> *children = [application descendantsMatchingType:elementType].allElementsBoundByIndex;
+  
+  NSString *matchString = [NSString stringWithFormat: @".*\\b%@.*", queryValue];
+  NSString *predicateString = [NSString stringWithFormat:@"%@ MATCHES[c] %%@", query];
+  
+  NSPredicate *predicate = [NSPredicate predicateWithFormat: predicateString, matchString];
+  XCUIElement *element = [[application descendantsMatchingType:elementType] elementMatchingPredicate:predicate];
+  if ([element exists]) {
+    //      NSString *wdname = element.wdName;
+    //      NSString *wdvalue = element.wdValue;
+    //      id evalue = element.value;
+    //      NSLog(@"%@, %@, %@", wdname, wdvalue, evalue);
+    
+    if (/*[type caseInsensitiveCompare:@"button"] == NSOrderedSame &&*/ useButtonTap) {
+      [element tap];
+    }
+    else {
+      NSDictionary *rect = [element wdRect];
+      CGFloat x = [[rect objectForKey:@"x"] floatValue];
+      CGFloat y = [[rect objectForKey:@"y"] floatValue];
+      CGFloat width = [[rect objectForKey:@"width"] doubleValue];
+      CGFloat height = [[rect objectForKey:@"height"] doubleValue];
+      CGPoint tapPoint = CGPointMake(x + width/2, y + height/2);
+      XCUICoordinate *tapCoordinate = [self.class gestureCoordinateWithCoordinate:tapPoint application:application shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
+      [tapCoordinate tap];
+    }
+    return FBResponseWithStatus(FBCommandStatusNoError, @{@"tapTime" : @([[NSDate date] timeIntervalSince1970])});
+    //    }
+    //    for (XCUIElement *child in children) {
+    //      BOOL compare = NO;
+    //      if (label != nil) {
+    //        compare = [label caseInsensitiveCompare:child.label] == NSOrderedSame;
+    //      }
+    //      else if (name != nil) {
+    //        compare = [name caseInsensitiveCompare:child.wdName] == NSOrderedSame;
+    //      }
+    //      else if (value != nil) {
+    //        NSString *childValue = child.wdValue;
+    //        compare = [value caseInsensitiveCompare:childValue] == NSOrderedSame;
+    //      }
+    //      if (compare) {
+    //        NSDictionary *rect = [child wdRect];
+    //        CGFloat x = [[rect objectForKey:@"x"] doubleValue];
+    //        CGFloat y = [[rect objectForKey:@"y"] doubleValue];
+    ////        CGFloat width = [[rect objectForKey:@"width"] doubleValue];
+    ////        CGFloat height = [[rect objectForKey:@"height"] doubleValue];
+    //        CGPoint tapPoint = CGPointMake(x, y); //(x + (width + x)/2, y + (height + y)/2);
+    //        XCUICoordinate *tapCoordinate = [self.class gestureCoordinateWithCoordinate:tapPoint application:request.session.application shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
+    //        [tapCoordinate tap];
+    //        return FBResponseWithStatus(FBCommandStatusNoError, @{@"tapTime" : @([[NSDate date] timeIntervalSince1970])});
+    ////        NSError *error;
+    ////        if ([child fb_tapCoordinate:tapPoint error:&error]) {
+    ////          return FBResponseWithStatus(FBCommandStatusNoError, @{@"tapTime" : @([[NSDate date] timeIntervalSince1970])});
+    ////        }
+    //      }
+    //    }
+  }
+  return FBResponseWithErrorFormat(@"Not found");
+}
 @end

@@ -9,6 +9,8 @@
 
 #import "FBCustomCommands.h"
 
+#import <sys/utsname.h>
+
 #import <XCTest/XCUIDevice.h>
 
 #import "FBApplication.h"
@@ -30,6 +32,7 @@
 #import "XCUIElementQuery.h"
 #import "FBFindElementCommands.h"
 #import "SocketRocket.h"
+#import "FBElementCommands.h"
 
 @implementation FBCustomCommands
 
@@ -57,7 +60,10 @@
     [[FBRoute POST:@"/wda/pressButton"] respondWithTarget:self action:@selector(handlePressButtonCommand:)],
     [[FBRoute POST:@"/wda/resetLocation"].withoutSession respondWithTarget:self action:@selector(handleResetLocationCommand:)],
     [[FBRoute POST:@"/screenCast"].withoutSession respondWithTarget:self action:@selector(handleScreenCast:)],
-    [[FBRoute POST:@"/stopScreenCast"].withoutSession respondWithTarget:self action:@selector(handleStopScreenCast:)]
+    [[FBRoute POST:@"/stopScreenCast"].withoutSession respondWithTarget:self action:@selector(handleStopScreenCast:)],
+    [[FBRoute POST:@"/screenMirror"].withoutSession respondWithTarget:self action:@selector(handleScreenMirror:)],
+    [[FBRoute POST:@"/stopScreenMirror"].withoutSession respondWithTarget:self action:@selector(handleStopScreenMirror:)],
+
   ];
 }
 
@@ -331,5 +337,109 @@ static NSData *kLastImageData;
   }
   //  });
 }
+
++ (BOOL)isSwipeFromTopRight {
+  struct utsname systemInfo;
+  uname(&systemInfo);
+
+  NSString *deviceName =  [NSString stringWithCString:systemInfo.machine encoding:NSUTF8StringEncoding];
+  if ([deviceName caseInsensitiveCompare:@"iPhone10,3"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone10,6"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone11,2"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone11,4"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone11,6"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone11,8"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone12,1"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone12,3"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone12,5"] == NSOrderedSame
+      ) {
+    return YES;
+  }
+  
+  // simulators
+  NSString *systemVersion = [[[UIDevice currentDevice] systemVersion] substringToIndex:2];
+  if ([deviceName caseInsensitiveCompare:@"x86_64"] == NSOrderedSame &&
+      [systemVersion integerValue] >= 12) {
+    return YES;
+  }
+  
+  // iPads
+  if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+    if ([systemVersion integerValue] >= 12) {
+      return YES;
+    }
+  }
+  return NO;
+}
+
++ (id<FBResponsePayload>)handleScreenMirror:(FBRouteRequest *)request
+{
+  NSString *airplayServer = request.arguments[@"airplay"];
+  if (airplayServer == nil) {
+    airplayServer = @"MesmAir";
+  }
+  
+  XCUIApplication *app =  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  CGRect frame = app.frame;
+  
+//  FBApplication *application = [FBApplication fb_activeApplication];
+//  CGRect frame = application.wdFrame;
+//  CGRect frame = [[UIScreen mainScreen] bounds];
+  if ([self isSwipeFromTopRight]) {
+    [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+  }
+  else {
+    //before iPhone X
+    [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+  }
+  
+  FBResponseJSONPayload *response = nil;
+  
+  for (int i = 0; i < 3; i++) {
+    [NSThread sleepForTimeInterval:(i * 1.0f)];
+    response = (FBResponseJSONPayload* _Nullable)[FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:@"Screen Mirroring" useButtonTap:YES];
+    if ([[[response dictionary] objectForKey:@"status"] integerValue] == 0) {
+      break;
+    }
+  }
+  
+  for (int i = 0; i < 3; i++) {
+    [NSThread sleepForTimeInterval:(i * 1.0f)];
+    response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:airplayServer useButtonTap:YES];
+    if ([[[response dictionary] objectForKey:@"status"] integerValue] == 0) {
+      break;
+    }
+  }
+  
+  [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(1, 1)];
+  [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(1, 1)];
+  
+  return response;
+}
+
++ (id<FBResponsePayload>)handleStopScreenMirror:(FBRouteRequest *)request
+{
+  NSString *airplayServer = request.arguments[@"airplay"];
+  if (airplayServer == nil) {
+    airplayServer = @"MesmAir";
+  }
+  
+  XCUIApplication *app =  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  CGRect frame = app.frame;
+  
+  if ([self isSwipeFromTopRight]) {
+    [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+  }
+  else {
+    //before iPhone X
+    [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+  }
+  id<FBResponsePayload> response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer useButtonTap:YES];
+  response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:@"Stop Mirroring" useButtonTap:YES];
+  [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(1, 1)];
+  
+  return response;
+}
+
 
 @end

@@ -13,7 +13,6 @@
 
 @interface FBResponseJSONPayload ()
 
-@property (nonatomic, copy, readonly) NSDictionary *dictionary;
 
 @end
 
