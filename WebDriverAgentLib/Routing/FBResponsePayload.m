@@ -16,6 +16,7 @@
 #import "FBMathUtils.h"
 #import "FBConfiguration.h"
 #import "FBMacros.h"
+#import "FBApplication.h"
 
 #import "XCUIElement+FBUtilities.h"
 #import "XCUIElement+FBWebDriverAttributes.h"
@@ -77,11 +78,13 @@ id<FBResponsePayload> FBResponseWithErrorFormat(NSString *format, ...)
 
 id<FBResponsePayload> FBResponseWithStatus(FBCommandStatus status, id object)
 {
+  FBApplication *application = [FBApplication fb_activeApplication];
   return [[FBResponseJSONPayload alloc] initWithDictionary:@{
     @"value" : object ?: @{},
     @"sessionId" : [FBSession activeSession].identifier ?: NSNull.null,
     @"status" : @(status),
-    @"systemInfo" : @{} // systemInfo(),
+    @"systemInfo" : @{}, // systemInfo(),
+    @"activeApp" : application == nil ? @"" : application.bundleID
   }];
 }
 
