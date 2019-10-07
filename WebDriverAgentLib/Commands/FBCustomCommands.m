@@ -375,6 +375,8 @@ static NSData *kLastImageData;
 + (id<FBResponsePayload>)handleScreenMirror:(FBRouteRequest *)request
 {
   NSString *airplayServer = request.arguments[@"airplay"];
+  BOOL wait = [request.arguments[@"wait"] boolValue];
+
   if (airplayServer == nil) {
     airplayServer = @"MesmAir";
   }
@@ -395,23 +397,37 @@ static NSData *kLastImageData;
   
   FBResponseJSONPayload *response = nil;
   
-  for (int i = 0; i < 3; i++) {
-    [NSThread sleepForTimeInterval:(i * 1.0f)];
-    response = (FBResponseJSONPayload* _Nullable)[FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:@"Screen Mirroring" useButtonTap:YES];
+  int i = 3;
+  while (i >= 0) {
+    response = (FBResponseJSONPayload* _Nullable)[FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:@"Screen Mirroring" useButtonTap:NO];
     if ([[[response dictionary] objectForKey:@"status"] integerValue] == 0) {
       break;
     }
+    if (wait == NO) {
+      i--;
+    }
+    [NSThread sleepForTimeInterval:(1.0f)];
   }
   
-  for (int i = 0; i < 3; i++) {
-    [NSThread sleepForTimeInterval:(i * 1.0f)];
-    response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:airplayServer useButtonTap:YES];
+  i = 3;
+  while (i >= 0) {
+    response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:airplayServer useButtonTap:NO];
+    if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+      //try button
+      [NSThread sleepForTimeInterval:0.2];
+      response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer useButtonTap:NO];
+    }
     if ([[[response dictionary] objectForKey:@"status"] integerValue] == 0) {
       break;
     }
+    if (wait == NO) {
+      i--;
+    }
+    [NSThread sleepForTimeInterval:(1.0f)];
   }
-  
+  [NSThread sleepForTimeInterval:0.2];
   [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(1, 1)];
+  [NSThread sleepForTimeInterval:0.2];
   [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(1, 1)];
   
   return response;
@@ -434,8 +450,19 @@ static NSData *kLastImageData;
     //before iPhone X
     [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
   }
-  id<FBResponsePayload> response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer useButtonTap:YES];
-  response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:@"Stop Mirroring" useButtonTap:YES];
+  FBResponseJSONPayload *response = (FBResponseJSONPayload* _Nullable)[FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer useButtonTap:NO];
+  if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+    //try static text
+    response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:airplayServer useButtonTap:NO];
+  }
+  [NSThread sleepForTimeInterval:0.2];
+  response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:@"Stop Mirroring" useButtonTap:NO];
+  if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+    //try static text
+    [NSThread sleepForTimeInterval:0.2];
+    response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:@"Stop Mirroring" useButtonTap:NO];
+  }
+  [NSThread sleepForTimeInterval:0.2];
   [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(1, 1)];
   
   return response;
