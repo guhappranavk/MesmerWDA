@@ -114,7 +114,7 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
   }
   [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
   
-  [FBLogger logFmt:@"Appium WDA Version: %@", @"10.04.2019.1"];
+  [FBLogger logFmt:@"Appium WDA Version: %@", @"10.07.2019.1"];
   [self startTimedTask];
   [[BSWDataModelHandler sharedInstance] loadModel:@"model" modelFileExtn:@"tflite" labels:@"labels" labelsFileExtn:@"txt"];
 }
@@ -198,6 +198,7 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
 - (BOOL)attemptToStartServer:(RoutingHTTPServer *)server onPort:(NSInteger)port withError:(NSError **)error
 {
   server.port = (UInt16)port;
+  server.interface = [XCUIDevice sharedDevice].fb_wifiIPAddress;
   NSError *innerError = nil;
   BOOL started = [server start:&innerError];
   if (!started) {

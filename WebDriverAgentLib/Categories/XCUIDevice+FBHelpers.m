@@ -248,6 +248,18 @@ static bool fb_isLocked;
 
 - (NSString *)fb_wifiIPAddress
 {
+  NSString *ip = [self fb_IPAddressInternal];
+  static int i = 0;
+  while (ip == nil) {
+    NSLog(@"#### trying to get usb interface: %d", ++i);
+    [NSThread sleepForTimeInterval:1];
+    ip = [self fb_IPAddressInternal];
+  }
+  i = 0;
+  return ip;
+}
+
+- (NSString *)fb_IPAddressInternal {
   struct ifaddrs *interfaces = NULL;
   struct ifaddrs *temp_addr = NULL;
   int success = getifaddrs(&interfaces);
@@ -264,7 +276,7 @@ static bool fb_isLocked;
       continue;
     }
     NSString *interfaceName = [NSString stringWithUTF8String:temp_addr->ifa_name];
-    if(![interfaceName containsString:@"en"]) {
+    if(![interfaceName containsString:@"en"] || [interfaceName containsString:@"en0"]) { //ignore wi-fi interface
       temp_addr = temp_addr->ifa_next;
       continue;
     }
