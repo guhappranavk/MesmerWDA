@@ -91,6 +91,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSData *)fb_screenshotHighWithError:(NSError*__autoreleasing*)error quality:(double)quality type:(NSString *)type;
 
 /**
+Returns device current usb interface ip4 address
+*/
+- (nullable NSString *)fb_usbIPAddress;
+
+/**
  Returns device current wifi ip4 address
  */
 - (nullable NSString *)fb_wifiIPAddress;

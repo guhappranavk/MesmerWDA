@@ -246,20 +246,20 @@ static bool fb_isLocked;
   return notify_post(name) == NOTIFY_STATUS_OK;
 }
 
-- (NSString *)fb_wifiIPAddress
+- (NSString *)fb_usbIPAddress
 {
-  NSString *ip = [self fb_IPAddressInternal];
+  NSString *ip = [self fb_usbIPAddressInternal];
   static int i = 0;
   while (ip == nil) {
     NSLog(@"#### trying to get usb interface: %d", ++i);
     [NSThread sleepForTimeInterval:1];
-    ip = [self fb_IPAddressInternal];
+    ip = [self fb_usbIPAddressInternal];
   }
   i = 0;
   return ip;
 }
 
-- (NSString *)fb_IPAddressInternal {
+- (NSString *)fb_usbIPAddressInternal {
   struct ifaddrs *interfaces = NULL;
   struct ifaddrs *temp_addr = NULL;
   int success = getifaddrs(&interfaces);
@@ -277,6 +277,34 @@ static bool fb_isLocked;
     }
     NSString *interfaceName = [NSString stringWithUTF8String:temp_addr->ifa_name];
     if(![interfaceName containsString:@"en"] || [interfaceName containsString:@"en0"]) { //ignore wi-fi interface
+      temp_addr = temp_addr->ifa_next;
+      continue;
+    }
+    address = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
+    break;
+  }
+  freeifaddrs(interfaces);
+  return address;
+}
+
+- (NSString *)fb_wifiIPAddress {
+  struct ifaddrs *interfaces = NULL;
+  struct ifaddrs *temp_addr = NULL;
+  int success = getifaddrs(&interfaces);
+  if (success != 0) {
+    freeifaddrs(interfaces);
+    return nil;
+  }
+
+  NSString *address = nil;
+  temp_addr = interfaces;
+  while(temp_addr != NULL) {
+    if(temp_addr->ifa_addr->sa_family != AF_INET) {
+      temp_addr = temp_addr->ifa_next;
+      continue;
+    }
+    NSString *interfaceName = [NSString stringWithUTF8String:temp_addr->ifa_name];
+    if(![interfaceName containsString:@"en0"]) {
       temp_addr = temp_addr->ifa_next;
       continue;
     }
