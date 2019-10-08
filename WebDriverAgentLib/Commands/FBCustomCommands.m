@@ -63,6 +63,7 @@
     [[FBRoute POST:@"/stopScreenCast"].withoutSession respondWithTarget:self action:@selector(handleStopScreenCast:)],
     [[FBRoute POST:@"/screenMirror"].withoutSession respondWithTarget:self action:@selector(handleScreenMirror:)],
     [[FBRoute POST:@"/stopScreenMirror"].withoutSession respondWithTarget:self action:@selector(handleStopScreenMirror:)],
+    [[FBRoute POST:@"/terminate"].withoutSession respondWithTarget:self action:@selector(handleTerminate:)],
 
   ];
 }
@@ -468,5 +469,18 @@ static NSData *kLastImageData;
   return response;
 }
 
++ (id<FBResponsePayload>)handleTerminate:(FBRouteRequest *)request
+{
+  NSString *bundleId = request.arguments[@"bundleId"];
+  if (bundleId == nil) {
+    return FBResponseWithErrorFormat(@"Missing bundle id in terminate command");
+  }
+  XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: bundleId];
+  if (app == nil || [app exists] == NO) {
+      return FBResponseWithErrorFormat(@"%@ Not found", bundleId);
+  }
+  [app terminate];
+  return FBResponseWithOK();
+}
 
 @end
