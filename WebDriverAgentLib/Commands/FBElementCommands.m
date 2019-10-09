@@ -382,7 +382,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
 }
 
 + (void)drag2:(CGPoint)startPoint endPoint:(CGPoint)endPoint duration:(double)duration velocity:(double)velocity {
-  XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  FBApplication *app = [FBApplication fb_activeApplication]; // [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
   NSObject *lock = [NSObject new];
   __block BOOL isHandlerCalled = NO;
   

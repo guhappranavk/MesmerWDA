@@ -33,6 +33,7 @@
 #import "FBFindElementCommands.h"
 #import "SocketRocket.h"
 #import "FBElementCommands.h"
+#import "FBMathUtils.h"
 
 @implementation FBCustomCommands
 
@@ -382,8 +383,9 @@ static NSData *kLastImageData;
     airplayServer = @"MesmAir";
   }
   
-  XCUIApplication *app =  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  XCUIApplication *app = [FBApplication fb_activeApplication];//  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
   CGRect frame = app.frame;
+  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
   
 //  FBApplication *application = [FBApplication fb_activeApplication];
 //  CGRect frame = application.wdFrame;
@@ -393,7 +395,13 @@ static NSData *kLastImageData;
   }
   else {
     //before iPhone X
-    [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    UIInterfaceOrientation orientation = app.interfaceOrientation;
+    if (orientation == UIInterfaceOrientationPortrait) {
+      [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    }
+    else {
+      [FBElementCommands drag2:CGPointMake(0, screenSize.height/2) endPoint:CGPointMake(frame.size.width/2, frame.size.height) duration:0.001 velocity:1500];
+    }
   }
   
   FBResponseJSONPayload *response = nil;
@@ -441,15 +449,22 @@ static NSData *kLastImageData;
     airplayServer = @"MesmAir";
   }
   
-  XCUIApplication *app =  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  XCUIApplication *app = [FBApplication fb_activeApplication];//  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
   CGRect frame = app.frame;
+  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
   
   if ([self isSwipeFromTopRight]) {
     [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
   }
   else {
     //before iPhone X
-    [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    UIInterfaceOrientation orientation = app.interfaceOrientation;
+    if (orientation == UIInterfaceOrientationPortrait) {
+      [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    }
+    else {
+      [FBElementCommands drag2:CGPointMake(0, screenSize.height/2) endPoint:CGPointMake(frame.size.width/2, frame.size.height) duration:0.001 velocity:1500];
+    }
   }
   FBResponseJSONPayload *response = (FBResponseJSONPayload* _Nullable)[FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer useButtonTap:NO];
   if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
