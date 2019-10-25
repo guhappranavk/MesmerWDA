@@ -830,6 +830,30 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
   return [ret integerValue];
 }
 
++ (BOOL)find:(FBApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue {
+  if (type == nil) {
+    return NO;
+  }
+  
+  XCUIElementType elementType = [self elementTypeFromName:type];
+  if (elementType == (XCUIElementType)-1) {
+    return NO;
+  }
+  
+  //  if (elementType != XCUIElementTypeOther) {
+  //    NSArray <XCUIElement *> *children = [application descendantsMatchingType:elementType].allElementsBoundByIndex;
+  
+  NSString *matchString = [NSString stringWithFormat: @".*\\b%@.*", queryValue];
+  NSString *predicateString = [NSString stringWithFormat:@"%@ MATCHES[c] %%@", query];
+  
+  NSPredicate *predicate = [NSPredicate predicateWithFormat: predicateString, matchString];
+  XCUIElement *element = [[application descendantsMatchingType:elementType] elementMatchingPredicate:predicate];
+  if ([element exists]) {
+    return YES;
+  }
+  return NO;
+}
+
 + (id<FBResponsePayload>)findAndTap:(FBApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue useButtonTap:(BOOL)useButtonTap {
   if (type == nil) {
     return FBResponseWithErrorFormat(@"type is missing");
