@@ -64,6 +64,7 @@
     [[FBRoute POST:@"/stopScreenCast"].withoutSession respondWithTarget:self action:@selector(handleStopScreenCast:)],
     [[FBRoute POST:@"/screenMirror"].withoutSession respondWithTarget:self action:@selector(handleScreenMirror:)],
     [[FBRoute POST:@"/stopScreenMirror"].withoutSession respondWithTarget:self action:@selector(handleStopScreenMirror:)],
+    [[FBRoute POST:@"/isScreenMirroring"].withoutSession respondWithTarget:self action:@selector(handleIsScreenMirroring:)],
     [[FBRoute POST:@"/terminate"].withoutSession respondWithTarget:self action:@selector(handleTerminate:)],
 
   ];
@@ -482,6 +483,39 @@ static NSData *kLastImageData;
   [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(1, 1)];
   
   return response;
+}
+
++ (id<FBResponsePayload>)handleIsScreenMirroring:(FBRouteRequest *)request
+{
+  NSString *airplayServer = request.arguments[@"airplay"];
+  if (airplayServer == nil) {
+    airplayServer = @"MesmAir";
+  }
+  
+  XCUIApplication *app = [FBApplication fb_activeApplication];//  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  CGRect frame = app.frame;
+  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
+  
+  if ([self isSwipeFromTopRight]) {
+    [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+  }
+  else {
+    //before iPhone X
+    UIInterfaceOrientation orientation = app.interfaceOrientation;
+    if (orientation == UIInterfaceOrientationPortrait) {
+      [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    }
+    else {
+      [FBElementCommands drag2:CGPointMake(0, screenSize.height/2) endPoint:CGPointMake(frame.size.width/2, frame.size.height) duration:0.001 velocity:1500];
+    }
+  }
+  BOOL mirroring = [FBElementCommands find:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer];
+  if (!mirroring) {
+    //try static text
+    mirroring = [FBElementCommands find:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:airplayServer];
+  }
+  [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(1, 1)];
+  return FBResponseWithObject(@{@"mirroring" : @(mirroring)});
 }
 
 + (id<FBResponsePayload>)handleTerminate:(FBRouteRequest *)request
