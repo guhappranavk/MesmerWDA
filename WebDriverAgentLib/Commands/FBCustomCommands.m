@@ -385,6 +385,10 @@ static NSData *kLastImageData;
   }
   
   XCUIApplication *app = [FBApplication fb_activeApplication];//  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  NSArray *alerts = [[app alerts] allElementsBoundByIndex];
+  if (alerts.count > 0) {
+    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+  }
   CGRect frame = app.frame;
   CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
   
@@ -451,6 +455,12 @@ static NSData *kLastImageData;
   }
   
   XCUIApplication *app = [FBApplication fb_activeApplication];//  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  
+  NSArray *alerts = [[app alerts] allElementsBoundByIndex];
+  if (alerts.count > 0) {
+    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+  }
+  
   CGRect frame = app.frame;
   CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
   
@@ -479,8 +489,8 @@ static NSData *kLastImageData;
     [NSThread sleepForTimeInterval:0.2];
     response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:@"Stop Mirroring" useButtonTap:NO];
   }
-  [NSThread sleepForTimeInterval:0.2];
-  [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(1, 1)];
+  [NSThread sleepForTimeInterval:0.5];
+  [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(24, 24)];
   
   return response;
 }
@@ -493,6 +503,11 @@ static NSData *kLastImageData;
   }
   
   XCUIApplication *app = [FBApplication fb_activeApplication];//  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  NSArray *alerts = [[app alerts] allElementsBoundByIndex];
+  if (alerts.count > 0) {
+    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+  }
+  
   CGRect frame = app.frame;
   CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
   
@@ -514,7 +529,7 @@ static NSData *kLastImageData;
     //try static text
     mirroring = [FBElementCommands find:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:airplayServer];
   }
-  [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(1, 1)];
+  [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(24, 24)];
   return FBResponseWithObject(@{@"mirroring" : @(mirroring)});
 }
 
