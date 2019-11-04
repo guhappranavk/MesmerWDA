@@ -86,6 +86,7 @@
   }
 
   [FBConfiguration setShouldWaitForQuiescence:[requirements[@"shouldWaitForQuiescence"] boolValue]];
+  [FBConfiguration setShouldAnonymizeFullImagePaths:[requirements[@"shouldAnonymizeFullImagePaths"] boolValue]];
 
   FBApplication *app = [[FBApplication alloc] initPrivateWithPath:appPath bundleID:bundleID];
   app.fb_shouldWaitForQuiescence = FBConfiguration.shouldWaitForQuiescence;

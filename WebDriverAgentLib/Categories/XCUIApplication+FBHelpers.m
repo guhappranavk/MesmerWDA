@@ -21,6 +21,7 @@
 #import "XCUIElement+FBIsVisible.h"
 #import "XCUIElement+FBUtilities.h"
 #import "XCUIElement+FBWebDriverAttributes.h"
+#import "FBElementAttributeTransformer.h"
 
 const static NSTimeInterval FBMinimumAppSwitchWait = 3.0;
 
@@ -81,7 +82,7 @@ const static NSTimeInterval FBMinimumAppSwitchWait = 3.0;
   NSMutableDictionary *info = [[NSMutableDictionary alloc] init];
   info[@"type"] = [FBElementTypeTransformer shortStringWithElementType:snapshot.elementType];
   info[@"rawIdentifier"] = FBValueOrNull([snapshot.identifier isEqual:@""] ? nil : snapshot.identifier);
-  info[@"name"] = FBValueOrNull(snapshot.wdName);
+  info[@"name"] = FBValueOrNull([FBElementAttributeTransformer anonymizedValueFor:snapshot.wdName]);
   info[@"value"] = FBValueOrNull(snapshot.wdValue);
   info[@"label"] = FBValueOrNull(snapshot.wdLabel);
   // It is mandatory to replace all Infinity values with zeroes to avoid JSON parsing
@@ -159,7 +160,10 @@ const static NSTimeInterval FBMinimumAppSwitchWait = 3.0;
   // debugDescription property of XCUIApplication instance shows descendants addresses in memory
   // instead of the actual information about them, however the representation works properly
   // for all descendant elements
-  return (0 == childrenDescriptions.count) ? self.debugDescription : [childrenDescriptions componentsJoinedByString:@"\n\n"];
+  NSString *description = (0 == childrenDescriptions.count) ? self.debugDescription : [childrenDescriptions componentsJoinedByString:@"\n\n"];
+  
+  description = [FBElementAttributeTransformer anonymizeValuesInDescription:description];
+  return description;
 }
 
 - (XCUIElement *)fb_activeElement

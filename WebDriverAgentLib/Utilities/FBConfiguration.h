@@ -46,6 +46,10 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)setShouldWaitForQuiescence:(BOOL)value;
 + (BOOL)shouldWaitForQuiescence;
 
+/* Whether to anonymize full image paths in source */
++ (BOOL)shouldAnonymizeFullImagePaths;
++ (void)setShouldAnonymizeFullImagePaths:(BOOL)value;
+
 /**
  The range of ports that the HTTP Server should attempt to bind on launch
  */
