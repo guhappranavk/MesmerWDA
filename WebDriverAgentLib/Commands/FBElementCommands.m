@@ -78,6 +78,7 @@
     [[FBRoute POST:@"/wda/dragfromtoforduration2"] respondWithTarget:self action:@selector(handleDragCoordinate2:)],
     [[FBRoute POST:@"/wda/tap/:uuid"] respondWithTarget:self action:@selector(handleTap:)],
     [[FBRoute POST:@"/wda/tap"] respondWithTarget:self action:@selector(handleTapCoordinate:)],
+    [[FBRoute POST:@"/wda/findAndTap"] respondWithTarget:self action:@selector(handleFindAndTap:)],
     [[FBRoute POST:@"/wda/touchAndHold"] respondWithTarget:self action:@selector(handleTouchAndHoldCoordinate:)],
     [[FBRoute POST:@"/wda/doubleTap"] respondWithTarget:self action:@selector(handleDoubleTapCoordinate:)],
     [[FBRoute POST:@"/wda/keys"] respondWithTarget:self action:@selector(handleKeys:)],
