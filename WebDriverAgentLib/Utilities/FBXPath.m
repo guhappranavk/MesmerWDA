@@ -15,6 +15,7 @@
 #import "XCUIElement.h"
 #import "XCUIElement+FBUtilities.h"
 #import "XCUIElement+FBWebDriverAttributes.h"
+#import "FBElementAttributeTransformer.h"
 
 
 @interface FBElementAttribute : NSObject
@@ -695,7 +696,7 @@ static NSString *const FBAbstractMethodInvocationException = @"AbstractMethodInv
 
 + (NSString *)valueForElement:(id<FBElement>)element
 {
-  return element.wdName;
+  return [FBElementAttributeTransformer anonymizedValueFor:element.wdName];
 }
 
 @end
