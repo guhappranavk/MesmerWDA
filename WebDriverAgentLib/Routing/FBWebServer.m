@@ -114,7 +114,7 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
   }
   [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
   
-  [FBLogger logFmt:@"Appium WDA Version: %@", @"11.04.2019.2"];
+  [FBLogger logFmt:@"Appium WDA Version: %@", @"11.05.2019.1"];
   
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     NSString *usbIp = [XCUIDevice sharedDevice].fb_usbIPAddress;
