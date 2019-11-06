@@ -86,8 +86,7 @@ static NSString *const SOURCE_FORMAT_DESCRIPTION = @"description";
   if (maxCells != nil) {
     maxCellsToReturn = [maxCells integerValue];
   }
-  NSLog(@"%@", maxCells);
-  NSLog(@"%@", attributes);
+
   NSString *sourceType = request.parameters[@"format"] ?: SOURCE_FORMAT_XML;
   id result;
   if ([sourceType caseInsensitiveCompare:SOURCE_FORMAT_XML] == NSOrderedSame) {

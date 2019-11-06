@@ -457,7 +457,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   
   NSArray *allAlerts = [alerts arrayByAddingObjectsFromArray:appAlerts];
   
-  NSLog(@"### TIVO DEBUG 2: alerts count: %lu", (unsigned long)allAlerts.count);
+//  NSLog(@"### TIVO DEBUG 2: alerts count: %lu", (unsigned long)allAlerts.count);
   if (allAlerts.count > 0) {
     XCUIElement *alert = allAlerts[0];
     NSArray *texts = [[alert staticTexts] allElementsBoundByIndex];
@@ -467,7 +467,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     for (XCUIElement *button in buttons) {
       if (CGRectContainsPoint(button.frame, tapPoint)) {
         NSString *label = [button label];
-        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
+//        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
         [button tap];
         return FBResponseWithStatus(FBCommandStatusNoError, @{
                                                               @"action": @"tap",
@@ -515,7 +515,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   
   NSArray *allAlerts = [alerts arrayByAddingObjectsFromArray:appAlerts];
   
-  NSLog(@"### TIVO DEBUG 2: alerts count: %lu", (unsigned long)allAlerts.count);
+//  NSLog(@"### TIVO DEBUG 2: alerts count: %lu", (unsigned long)allAlerts.count);
   if (allAlerts.count > 0) {
     XCUIElement *alert = allAlerts[0];
     NSArray *texts = [[alert staticTexts] allElementsBoundByIndex];
@@ -525,7 +525,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     for (XCUIElement *button in buttons) {
       if (CGRectContainsPoint(button.frame, tapPoint)) {
         NSString *label = [button label];
-        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
+//        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
         [button tap];
         return FBResponseWithStatus(FBCommandStatusNoError, @{
                                                               @"action": @"tap",
