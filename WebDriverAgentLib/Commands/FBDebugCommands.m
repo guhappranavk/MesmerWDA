@@ -76,7 +76,7 @@ static NSString *const SOURCE_FORMAT_DESCRIPTION = @"description";
     return FBResponseWithObject(ret);
   }
   
-  NSString *attributes = rquest.parameters[@"attributes"];
+  NSString *attributes = request.parameters[@"attributes"];
   if (attributes != nil) {
     attributes = [attributes stringByReplacingOccurrencesOfString:@":" withString:@" @"];
     attributes = [NSString stringWithFormat:@" @%@ ", attributes];
