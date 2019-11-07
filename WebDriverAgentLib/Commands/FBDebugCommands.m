@@ -70,11 +70,11 @@ static NSString *const SOURCE_FORMAT_DESCRIPTION = @"description";
 {
   FBApplication *application = request.session.activeApplication ?: [FBApplication fb_activeApplication];
   
-  if ([application.bundleID caseInsensitiveCompare:@"com.apple.mobilesafari"] == NSOrderedSame) {
-    CGRect frame = application.fb_lastSnapshot.frame;
-    NSString *ret = [NSString stringWithFormat:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<XCUIElementTypeApplication type=\"XCUIElementTypeApplication\" class=\"UIApplication\" name=\"Safari\" label=\"Safari\" enabled=\"true\" hasFocus=\"false\" x=\"0\" y=\"0\" width=\"%.0f\" height=\"%.0f\">\n</XCUIElementTypeApplication>", frame.size.width, frame.size.height];
-    return FBResponseWithObject(ret);
-  }
+//  if ([application.bundleID caseInsensitiveCompare:@"com.apple.mobilesafari"] == NSOrderedSame) {
+//    CGRect frame = application.fb_lastSnapshot.frame;
+//    NSString *ret = [NSString stringWithFormat:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<XCUIElementTypeApplication type=\"XCUIElementTypeApplication\" class=\"UIApplication\" name=\"Safari\" label=\"Safari\" enabled=\"true\" hasFocus=\"false\" x=\"0\" y=\"0\" width=\"%.0f\" height=\"%.0f\">\n</XCUIElementTypeApplication>", frame.size.width, frame.size.height];
+//    return FBResponseWithObject(ret);
+//  }
   
   NSString *attributes = request.parameters[@"attributes"];
   if (attributes != nil) {

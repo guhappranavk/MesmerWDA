@@ -145,7 +145,11 @@ static NSMutableDictionary<NSNumber *, NSMutableDictionary<NSString *, NSMutable
     return [FBElementTypeTransformer stringWithElementType:self.elementType];
   };
   
-  return [self fb_cachedValueWithAttributeName:@"wdType" valueGetter:getter];
+  NSString *ret = [self fb_cachedValueWithAttributeName:@"wdType" valueGetter:getter];
+  if ([ret hasPrefix:@"Unknown"]) {
+    ret = @"XCUIElementTypeOther";
+  }
+  return ret;
 }
 
 - (NSString *)wdUID
