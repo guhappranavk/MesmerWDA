@@ -108,7 +108,6 @@
 		ADEF63AF1D09DEBE0070A7E3 /* FBRuntimeUtilsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = ADEF63AE1D09DEBE0070A7E3 /* FBRuntimeUtilsTests.m */; };
 		DA02E46C236AE7B9007EB8EB /* FBElementAttributeTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = DA02E46B236AE7B9007EB8EB /* FBElementAttributeTransformer.m */; };
 		DA02E46E236AE7CA007EB8EB /* FBElementAttributeTransformer.h in Headers */ = {isa = PBXBuildFile; fileRef = DA02E46D236AE7CA007EB8EB /* FBElementAttributeTransformer.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		DA02E470236B285B007EB8EB /* FBElementAttributeTransformerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DA02E46F236B285B007EB8EB /* FBElementAttributeTransformerTests.m */; };
 		DA6293AA22F1A013005E680B /* NSRunLoop+SRWebSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = DA6293A322F1A013005E680B /* NSRunLoop+SRWebSocket.h */; };
 		DA6293AB22F1A013005E680B /* NSURLRequest+SRWebSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = DA6293A422F1A013005E680B /* NSURLRequest+SRWebSocket.h */; };
 		DA6293AC22F1A013005E680B /* SRSecurityPolicy.h in Headers */ = {isa = PBXBuildFile; fileRef = DA6293A522F1A013005E680B /* SRSecurityPolicy.h */; };
@@ -116,6 +115,7 @@
 		DA6293AE22F1A014005E680B /* SocketRocket.h in Headers */ = {isa = PBXBuildFile; fileRef = DA6293A722F1A013005E680B /* SocketRocket.h */; };
 		DA6293AF22F1A014005E680B /* libSocketRocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DA6293A822F1A013005E680B /* libSocketRocket.a */; };
 		DA6293B022F1A014005E680B /* libSocketRocketSim.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DA6293A922F1A013005E680B /* libSocketRocketSim.a */; };
+		DAC54F802374383F0030FFC1 /* FBElementAttributeTransformerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DA02E46F236B285B007EB8EB /* FBElementAttributeTransformerTests.m */; };
 		E456BF73206BC17F00963F9F /* YYCache.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E456BF72206BC17F00963F9F /* YYCache.framework */; };
 		EE006EAD1EB99B15006900A4 /* FBElementVisibilityTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EE006EAC1EB99B15006900A4 /* FBElementVisibilityTests.m */; };
 		EE006EB01EBA1AA9006900A4 /* XCElementSnapshot+FBHitPoint.h in Headers */ = {isa = PBXBuildFile; fileRef = EE006EAE1EBA1AA9006900A4 /* XCElementSnapshot+FBHitPoint.h */; };
@@ -2103,6 +2103,7 @@
 				EE3F8D001D08B05F006F02CE /* FBElementTypeTransformerTests.m in Sources */,
 				1FC3B2E32121ECF600B61EE0 /* FBApplicationProcessProxyTests.m in Sources */,
 				EEE16E971D33A25500172525 /* FBConfigurationTests.m in Sources */,
+				DAC54F802374383F0030FFC1 /* FBElementAttributeTransformerTests.m in Sources */,
 				ADBC39941D0782CD00327304 /* FBElementCacheTests.m in Sources */,
 				719FF5B91DAD21F5008E0099 /* FBElementUtilitiesTests.m in Sources */,
 				716E0BD11E917F260087A825 /* FBXMLSafeStringTests.m in Sources */,
@@ -2157,7 +2158,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				EE9AB8011CAEE048008C271F /* UITestingUITests.m in Sources */,
-				DA02E470236B285B007EB8EB /* FBElementAttributeTransformerTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
