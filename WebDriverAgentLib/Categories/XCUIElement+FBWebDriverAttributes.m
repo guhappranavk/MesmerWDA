@@ -243,10 +243,10 @@ static NSMutableDictionary<NSNumber *, NSMutableDictionary<NSString *, NSMutable
   id (^getter)(void) = ^id(void) {
     CGRect frame = self.wdFrame;
     return @{
-      @"x": @(CGRectGetMinX(frame)),
-      @"y": @(CGRectGetMinY(frame)),
-      @"width": @(CGRectGetWidth(frame)),
-      @"height": @(CGRectGetHeight(frame)),
+      @"x": @(frame.origin.x),
+      @"y": @(frame.origin.y),
+      @"width": @(frame.size.width),
+      @"height": @(frame.size.height),
     };
   };
   
