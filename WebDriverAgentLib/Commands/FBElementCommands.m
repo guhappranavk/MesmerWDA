@@ -17,6 +17,7 @@
 #import "FBRouteRequest.h"
 #import "FBRunLoopSpinner.h"
 #import "FBElementCache.h"
+#import "FBElementUtils.h"
 #import "FBErrorBuilder.h"
 #import "FBSession.h"
 #import "FBApplication.h"
@@ -342,7 +343,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
   NSArray *alerts = [[app alerts] allElementsBoundByIndex];
   if (alerts.count > 0) {
-    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
   }
   
   FBSession *session = request.session;
@@ -360,7 +361,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
   NSArray *alerts = [[app alerts] allElementsBoundByIndex];
   if (alerts.count > 0) {
-    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
   }
   
   //  FBSession *session = request.session;
@@ -486,7 +487,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     }
     
     if (allAlerts.count > 0) {
-      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alert withInfo:@"A modal dialog was open, blocking this operation"]);
     }
   }
   
@@ -544,7 +545,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     }
     
     if (allAlerts.count > 0) {
-      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:allAlerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
     }
   }
     

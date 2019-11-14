@@ -34,6 +34,7 @@
 #import "SocketRocket.h"
 #import "FBElementCommands.h"
 #import "FBMathUtils.h"
+#import "FBElementUtils.h"
 
 @implementation FBCustomCommands
 
@@ -387,7 +388,7 @@ static NSData *kLastImageData;
   XCUIApplication *app = [FBApplication fb_activeApplication];//  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
   NSArray *alerts = [[app alerts] allElementsBoundByIndex];
   if (alerts.count > 0) {
-    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
   }
   CGRect frame = app.frame;
   CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
@@ -458,7 +459,7 @@ static NSData *kLastImageData;
   
   NSArray *alerts = [[app alerts] allElementsBoundByIndex];
   if (alerts.count > 0) {
-    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
   }
   
   CGRect frame = app.frame;
@@ -505,7 +506,7 @@ static NSData *kLastImageData;
   XCUIApplication *app = [FBApplication fb_activeApplication];//  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
   NSArray *alerts = [[app alerts] allElementsBoundByIndex];
   if (alerts.count > 0) {
-    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
   }
   
   CGRect frame = app.frame;
