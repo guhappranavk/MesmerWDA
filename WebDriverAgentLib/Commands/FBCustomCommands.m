@@ -67,7 +67,9 @@
     [[FBRoute POST:@"/stopScreenMirror"].withoutSession respondWithTarget:self action:@selector(handleStopScreenMirror:)],
     [[FBRoute POST:@"/isScreenMirroring"].withoutSession respondWithTarget:self action:@selector(handleIsScreenMirroring:)],
     [[FBRoute POST:@"/terminate"].withoutSession respondWithTarget:self action:@selector(handleTerminate:)],
-
+    [[FBRoute POST:@"/wifi"].withoutSession respondWithTarget:self action:@selector(handleWifi:)],
+    [[FBRoute POST:@"/bluetooth"].withoutSession respondWithTarget:self action:@selector(handleBluetooth:)],
+    [[FBRoute POST:@"/airplane"].withoutSession respondWithTarget:self action:@selector(handleAirplane:)],
   ];
 }
 
@@ -525,10 +527,10 @@ static NSData *kLastImageData;
       [FBElementCommands drag2:CGPointMake(0, screenSize.height/2) endPoint:CGPointMake(frame.size.width/2, frame.size.height) duration:0.001 velocity:1500];
     }
   }
-  BOOL mirroring = [FBElementCommands find:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer];
+  BOOL mirroring = [FBElementCommands find:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer] != nil;
   if (!mirroring) {
     //try static text
-    mirroring = [FBElementCommands find:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:airplayServer];
+    mirroring = [FBElementCommands find:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:airplayServer] != nil;
   }
   [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(24, 24)];
   return FBResponseWithObject(@{@"mirroring" : @(mirroring)});
@@ -545,6 +547,72 @@ static NSData *kLastImageData;
       return FBResponseWithErrorFormat(@"%@ Not found", bundleId);
   }
   [app terminate];
+  return FBResponseWithOK();
+}
+
++ (id<FBResponsePayload>)handleWifi:(FBRouteRequest *)request
+{
+  BOOL on = [request.arguments[@"set"] boolValue];
+  return [self setPreference:@"Wi-Fi" on:on];
+}
+
++ (id<FBResponsePayload>)handleBluetooth:(FBRouteRequest *)request
+{
+  BOOL on = [request.arguments[@"set"] boolValue];
+  return [self setPreference:@"Bluetooth" on:on];
+}
+
++ (id<FBResponsePayload>)handleAirplane:(FBRouteRequest *)request
+{
+  BOOL on = [request.arguments[@"set"] boolValue];
+  return [self setPreference:@"Airplane Mode" on:on];
+}
+
++ (id<FBResponsePayload>)setPreference:(NSString *)preference on:(BOOL)on
+{
+  XCUIApplication *app = [FBApplication fb_activeApplication];
+  [[FBSession activeSession] launchApplicationWithBundleId:@"com.apple.Preferences"
+                         shouldWaitForQuiescence:@(YES)
+                                       arguments:nil
+                                     environment:nil];
+  
+  XCUIApplication *preferencesApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.Preferences"];
+  FBResponseJSONPayload *response = nil;
+//  while (YES) {
+    [NSThread sleepForTimeInterval:0.5];
+    response = [FBElementCommands findAndTap:preferencesApp type:@"StaticText" query:@"label" queryValue:preference useButtonTap:YES];
+    if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+//      continue;
+    }
+//    break;
+//  }
+  XCUIElement *switchElem = nil;
+  while (switchElem == nil) {
+    [NSThread sleepForTimeInterval:0.5];
+    switchElem = [FBElementCommands find:preferencesApp type:@"Switch" query:@"label" queryValue:preference];
+  }
+  if (switchElem) {
+    BOOL isOn = [switchElem.value integerValue] == 1;
+    if (isOn != on) {
+      [switchElem tap];
+    }
+  }
+ 
+  if (UIInterfaceOrientationIsPortrait([app interfaceOrientation])) {
+    // launching the original app causes issues with navigation links if you go back and forth between settings app and the original app.
+    [FBElementCommands tapCoordinate:preferencesApp tapPoint:CGPointMake(15, 15)];
+  }
+  else {
+    //  [[FBSession activeSession] launchApplicationWithBundleId:bundleId
+    //                         shouldWaitForQuiescence:@(YES)
+    //                                       arguments:nil
+    //                                     environment:nil];
+    
+    // landscape mode doesn't have the app navigation button
+    [app activate];
+  }
+  [preferencesApp terminate];
+//  [[FBSession activeSession] terminateApplicationWithBundleId:@"com.apple.Preferences"];
   return FBResponseWithOK();
 }
 

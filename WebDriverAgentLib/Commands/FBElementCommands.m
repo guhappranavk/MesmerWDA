@@ -555,7 +555,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   return FBResponseWithOK();
 }
 
-+ (void)tapCoordinate:(FBApplication *)application tapPoint:(CGPoint)tapPoint {
++ (void)tapCoordinate:(XCUIApplication *)application tapPoint:(CGPoint)tapPoint {
   XCUICoordinate *tapCoordinate = [self.class gestureCoordinateWithCoordinate:tapPoint application:application shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
   [tapCoordinate tap];
 }
@@ -832,14 +832,14 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
   return [ret integerValue];
 }
 
-+ (BOOL)find:(FBApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue {
++ (id)find:(XCUIApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue {
   if (type == nil) {
-    return NO;
+    return nil;
   }
   
   XCUIElementType elementType = [self elementTypeFromName:type];
   if (elementType == (XCUIElementType)-1) {
-    return NO;
+    return nil;
   }
   
   //  if (elementType != XCUIElementTypeOther) {
@@ -851,12 +851,12 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
   NSPredicate *predicate = [NSPredicate predicateWithFormat: predicateString, matchString];
   XCUIElement *element = [[application descendantsMatchingType:elementType] elementMatchingPredicate:predicate];
   if ([element exists]) {
-    return YES;
+    return element;
   }
-  return NO;
+  return nil;
 }
 
-+ (id<FBResponsePayload>)findAndTap:(FBApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue useButtonTap:(BOOL)useButtonTap {
++ (id<FBResponsePayload>)findAndTap:(XCUIApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue useButtonTap:(BOOL)useButtonTap {
   if (type == nil) {
     return FBResponseWithErrorFormat(@"type is missing");
   }
