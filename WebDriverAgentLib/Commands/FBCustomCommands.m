@@ -71,6 +71,7 @@
     [[FBRoute POST:@"/bluetooth"].withoutSession respondWithTarget:self action:@selector(handleBluetooth:)],
     [[FBRoute POST:@"/airplane"].withoutSession respondWithTarget:self action:@selector(handleAirplane:)],
     [[FBRoute POST:@"/cellular"].withoutSession respondWithTarget:self action:@selector(handleCellular:)],
+    [[FBRoute POST:@"/orientationLock"].withoutSession respondWithTarget:self action:@selector(handleOrientationLock:)],
   ];
 }
 
@@ -575,6 +576,47 @@ static NSData *kLastImageData;
   return [self setPreference:@"Cellular" innerPreference:@"Cellular Data" on:on];
 }
 
++ (id<FBResponsePayload>)handleOrientationLock:(FBRouteRequest *)request
+{
+  BOOL on = [request.arguments[@"set"] boolValue];
+  XCUIApplication *app = [FBApplication fb_activeApplication];//  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  NSArray *alerts = [[app alerts] allElementsBoundByIndex];
+  if (alerts.count > 0) {
+    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
+  }
+  CGRect frame = app.frame;
+  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
+  
+  //  FBApplication *application = [FBApplication fb_activeApplication];
+  //  CGRect frame = application.wdFrame;
+  //  CGRect frame = [[UIScreen mainScreen] bounds];
+  if ([self isSwipeFromTopRight]) {
+    [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+  }
+  else {
+    //before iPhone X
+    UIInterfaceOrientation orientation = app.interfaceOrientation;
+    if (orientation == UIInterfaceOrientationPortrait) {
+      [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    }
+    else {
+      [FBElementCommands drag2:CGPointMake(0, screenSize.height/2) endPoint:CGPointMake(frame.size.width/2, frame.size.height) duration:0.001 velocity:1500];
+    }
+  }
+  
+  XCUIElement *ol = [FBElementCommands find:[FBApplication fb_activeApplication] type:@"Switch" query:@"label" queryValue:@"Lock Rotation"];
+  if (ol) {
+    BOOL isOn = [ol.value integerValue] == 1;
+    if (isOn != on) {
+      [ol tap];
+    }
+  }
+  [NSThread sleepForTimeInterval:0.2];
+  [FBElementCommands tapCoordinate:[FBApplication fb_activeApplication] tapPoint:CGPointMake(1, 1)];
+  
+  return FBResponseWithOK();
+}
+
 + (id<FBResponsePayload>)setPreference:(NSString *)preference innerPreference:(NSString *)innerPreference on:(BOOL)on
 {
   if (innerPreference == nil) {
@@ -585,6 +627,11 @@ static NSData *kLastImageData;
 //                         shouldWaitForQuiescence:@(YES)
 //                                       arguments:nil
 //                                     environment:nil];
+  
+  NSArray *alerts = [[app alerts] allElementsBoundByIndex];
+  if (alerts.count > 0) {
+    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
+  }
   
   XCUIApplication *preferencesApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.Preferences"];
   [preferencesApp launch];
