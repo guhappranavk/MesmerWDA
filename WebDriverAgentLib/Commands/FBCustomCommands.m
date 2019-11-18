@@ -70,6 +70,7 @@
     [[FBRoute POST:@"/wifi"].withoutSession respondWithTarget:self action:@selector(handleWifi:)],
     [[FBRoute POST:@"/bluetooth"].withoutSession respondWithTarget:self action:@selector(handleBluetooth:)],
     [[FBRoute POST:@"/airplane"].withoutSession respondWithTarget:self action:@selector(handleAirplane:)],
+    [[FBRoute POST:@"/cellular"].withoutSession respondWithTarget:self action:@selector(handleCellular:)],
   ];
 }
 
@@ -553,43 +554,67 @@ static NSData *kLastImageData;
 + (id<FBResponsePayload>)handleWifi:(FBRouteRequest *)request
 {
   BOOL on = [request.arguments[@"set"] boolValue];
-  return [self setPreference:@"Wi-Fi" on:on];
+  return [self setPreference:@"Wi-Fi" innerPreference:nil on:on];
 }
 
 + (id<FBResponsePayload>)handleBluetooth:(FBRouteRequest *)request
 {
   BOOL on = [request.arguments[@"set"] boolValue];
-  return [self setPreference:@"Bluetooth" on:on];
+  return [self setPreference:@"Bluetooth" innerPreference:nil on:on];
 }
 
 + (id<FBResponsePayload>)handleAirplane:(FBRouteRequest *)request
 {
   BOOL on = [request.arguments[@"set"] boolValue];
-  return [self setPreference:@"Airplane Mode" on:on];
+  return [self setPreference:nil innerPreference:@"Airplane Mode" on:on];
 }
 
-+ (id<FBResponsePayload>)setPreference:(NSString *)preference on:(BOOL)on
++ (id<FBResponsePayload>)handleCellular:(FBRouteRequest *)request
 {
+  BOOL on = [request.arguments[@"set"] boolValue];
+  return [self setPreference:@"Cellular" innerPreference:@"Cellular Data" on:on];
+}
+
++ (id<FBResponsePayload>)setPreference:(NSString *)preference innerPreference:(NSString *)innerPreference on:(BOOL)on
+{
+  if (innerPreference == nil) {
+    innerPreference = preference;
+  }
   XCUIApplication *app = [FBApplication fb_activeApplication];
-  [[FBSession activeSession] launchApplicationWithBundleId:@"com.apple.Preferences"
-                         shouldWaitForQuiescence:@(YES)
-                                       arguments:nil
-                                     environment:nil];
+//  [[FBSession activeSession] launchApplicationWithBundleId:@"com.apple.Preferences"
+//                         shouldWaitForQuiescence:@(YES)
+//                                       arguments:nil
+//                                     environment:nil];
   
   XCUIApplication *preferencesApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.Preferences"];
+  [preferencesApp launch];
   FBResponseJSONPayload *response = nil;
-//  while (YES) {
+  
+  if (preference != nil) {
     [NSThread sleepForTimeInterval:0.5];
-    response = [FBElementCommands findAndTap:preferencesApp type:@"StaticText" query:@"label" queryValue:preference useButtonTap:YES];
+    response = [FBElementCommands findAndTap:preferencesApp type:@"Cell" query:@"label" queryValue:preference useButtonTap:YES];
     if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
-//      continue;
+      if (UIInterfaceOrientationIsPortrait([app interfaceOrientation])) {
+        // launching the original app causes issues with navigation links if you go back and forth between settings app and the original app.
+        [FBElementCommands tapCoordinate:preferencesApp tapPoint:CGPointMake(15, 15)];
+      }
+      else {
+        //  [[FBSession activeSession] launchApplicationWithBundleId:bundleId
+        //                         shouldWaitForQuiescence:@(YES)
+        //                                       arguments:nil
+        //                                     environment:nil];
+        
+        // landscape mode doesn't have the app navigation button
+        [app activate];
+      }
+      [preferencesApp terminate];
+      return response;
     }
-//    break;
-//  }
+  }
   XCUIElement *switchElem = nil;
   while (switchElem == nil) {
     [NSThread sleepForTimeInterval:0.5];
-    switchElem = [FBElementCommands find:preferencesApp type:@"Switch" query:@"label" queryValue:preference];
+    switchElem = [FBElementCommands find:preferencesApp type:@"Switch" query:@"label" queryValue:innerPreference];
   }
   if (switchElem) {
     BOOL isOn = [switchElem.value integerValue] == 1;

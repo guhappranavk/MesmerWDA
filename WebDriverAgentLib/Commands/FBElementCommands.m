@@ -874,7 +874,7 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
   
   NSPredicate *predicate = [NSPredicate predicateWithFormat: predicateString, matchString];
   XCUIElement *element = [[application descendantsMatchingType:elementType] elementMatchingPredicate:predicate];
-  if ([element exists]) {
+  if ([element exists] && [element isEnabled]) {
     //      NSString *wdname = element.wdName;
     //      NSString *wdvalue = element.wdValue;
     //      id evalue = element.value;
@@ -924,6 +924,6 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
     //      }
     //    }
   }
-  return FBResponseWithErrorFormat(@"Not found");
+  return FBResponseWithErrorFormat(@"%@ not found or not enabled", queryValue);
 }
 @end
