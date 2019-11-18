@@ -874,7 +874,7 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
   
   NSPredicate *predicate = [NSPredicate predicateWithFormat: predicateString, matchString];
   XCUIElement *element = [[application descendantsMatchingType:elementType] elementMatchingPredicate:predicate];
-  if ([element exists] && [element isEnabled]) {
+  if ([element exists]) { //} && [element isEnabled]) {
     //      NSString *wdname = element.wdName;
     //      NSString *wdvalue = element.wdValue;
     //      id evalue = element.value;
