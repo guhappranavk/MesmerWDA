@@ -845,7 +845,7 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
   //  if (elementType != XCUIElementTypeOther) {
   //    NSArray <XCUIElement *> *children = [application descendantsMatchingType:elementType].allElementsBoundByIndex;
   
-  NSString *matchString = [NSString stringWithFormat: @".*\\b%@.*", queryValue];
+  NSString *matchString = [NSString stringWithFormat: @".*\\b%@", queryValue];
   NSString *predicateString = [NSString stringWithFormat:@"%@ MATCHES[c] %%@", query];
   
   NSPredicate *predicate = [NSPredicate predicateWithFormat: predicateString, matchString];

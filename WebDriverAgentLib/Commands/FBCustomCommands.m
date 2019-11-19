@@ -65,6 +65,7 @@
     [[FBRoute POST:@"/stopScreenCast"].withoutSession respondWithTarget:self action:@selector(handleStopScreenCast:)],
     [[FBRoute POST:@"/screenMirror"].withoutSession respondWithTarget:self action:@selector(handleScreenMirror:)],
     [[FBRoute POST:@"/stopScreenMirror"].withoutSession respondWithTarget:self action:@selector(handleStopScreenMirror:)],
+    [[FBRoute POST:@"/restartScreenMirror"].withoutSession respondWithTarget:self action:@selector(handleRestartScreenMirror:)],
     [[FBRoute POST:@"/isScreenMirroring"].withoutSession respondWithTarget:self action:@selector(handleIsScreenMirroring:)],
     [[FBRoute POST:@"/terminate"].withoutSession respondWithTarget:self action:@selector(handleTerminate:)],
     [[FBRoute POST:@"/wifi"].withoutSession respondWithTarget:self action:@selector(handleWifi:)],
@@ -72,6 +73,8 @@
     [[FBRoute POST:@"/airplane"].withoutSession respondWithTarget:self action:@selector(handleAirplane:)],
     [[FBRoute POST:@"/cellular"].withoutSession respondWithTarget:self action:@selector(handleCellular:)],
     [[FBRoute POST:@"/orientationLock"].withoutSession respondWithTarget:self action:@selector(handleOrientationLock:)],
+    [[FBRoute GET:@"/networkConditions"].withoutSession respondWithTarget:self action:@selector(handleNetworkConditions:)],
+    [[FBRoute POST:@"/networkCondition"].withoutSession respondWithTarget:self action:@selector(handleNetworkCondition:)],
   ];
 }
 
@@ -500,6 +503,12 @@ static NSData *kLastImageData;
   return response;
 }
 
++ (id<FBResponsePayload>)handleRestartScreenMirror:(FBRouteRequest *)request
+{
+  [self handleStopScreenMirror:request];
+  return [self handleScreenMirror:request];
+}
+
 + (id<FBResponsePayload>)handleIsScreenMirroring:(FBRouteRequest *)request
 {
   NSString *airplayServer = request.arguments[@"airplay"];
@@ -576,20 +585,59 @@ static NSData *kLastImageData;
   return [self setPreference:@"Cellular" innerPreference:@"Cellular Data" on:on];
 }
 
-+ (id<FBResponsePayload>)handleOrientationLock:(FBRouteRequest *)request
++ (id<FBResponsePayload>)setPreference:(NSString *)preference innerPreference:(NSString *)innerPreference on:(BOOL)on
 {
-  BOOL on = [request.arguments[@"set"] boolValue];
-  XCUIApplication *app = [FBApplication fb_activeApplication];//  [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  if (innerPreference == nil) {
+    innerPreference = preference;
+  }
+  XCUIApplication *app = [FBApplication fb_activeApplication];
+  
   NSArray *alerts = [[app alerts] allElementsBoundByIndex];
   if (alerts.count > 0) {
     return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
   }
+  
+  XCUIApplication *preferencesApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.Preferences"];
+  [preferencesApp launch];
+  
+  if (preference != nil) {
+    XCUIElement *cellElem = [FBElementCommands find:preferencesApp type:@"Cell" query:@"label" queryValue:preference];
+    if (cellElem == nil || [cellElem isEnabled] == NO) {
+      [self terminatePreferencesApp:preferencesApp andActivate:app];
+      return FBResponseWithStatus(FBCommandStatusUnhandled, [NSString stringWithFormat:@"Couldn't set preference: %@", preference]);
+    }
+  }
+  
+  XCUIElement *switchElem = nil;
+  while (switchElem == nil) {
+    [NSThread sleepForTimeInterval:0.5];
+    switchElem = [FBElementCommands find:preferencesApp type:@"Switch" query:@"label" queryValue:innerPreference];
+  }
+  
+  if (switchElem) {
+    BOOL isOn = [switchElem.value integerValue] == 1;
+    if (isOn != on) {
+      [switchElem tap];
+    }
+  }
+ 
+  [self terminatePreferencesApp:preferencesApp andActivate:app];
+
+  return FBResponseWithOK();
+}
+
++ (id<FBResponsePayload>)handleOrientationLock:(FBRouteRequest *)request
+{
+  BOOL on = [request.arguments[@"set"] boolValue];
+  XCUIApplication *app = [FBApplication fb_activeApplication];
+  NSArray *alerts = [[app alerts] allElementsBoundByIndex];
+  if (alerts.count > 0) {
+    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
+  }
+  
   CGRect frame = app.frame;
   CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
   
-  //  FBApplication *application = [FBApplication fb_activeApplication];
-  //  CGRect frame = application.wdFrame;
-  //  CGRect frame = [[UIScreen mainScreen] bounds];
   if ([self isSwipeFromTopRight]) {
     [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
   }
@@ -617,17 +665,9 @@ static NSData *kLastImageData;
   return FBResponseWithOK();
 }
 
-+ (id<FBResponsePayload>)setPreference:(NSString *)preference innerPreference:(NSString *)innerPreference on:(BOOL)on
++ (id<FBResponsePayload>)handleNetworkConditions:(FBRouteRequest *)request
 {
-  if (innerPreference == nil) {
-    innerPreference = preference;
-  }
   XCUIApplication *app = [FBApplication fb_activeApplication];
-//  [[FBSession activeSession] launchApplicationWithBundleId:@"com.apple.Preferences"
-//                         shouldWaitForQuiescence:@(YES)
-//                                       arguments:nil
-//                                     environment:nil];
-  
   NSArray *alerts = [[app alerts] allElementsBoundByIndex];
   if (alerts.count > 0) {
     return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
@@ -637,39 +677,101 @@ static NSData *kLastImageData;
   [preferencesApp launch];
   FBResponseJSONPayload *response = nil;
   
-  if (preference != nil) {
+  response = [FBElementCommands findAndTap:preferencesApp type:@"Cell" query:@"label" queryValue:@"Developer" useButtonTap:YES];
+  if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+    [self terminatePreferencesApp:preferencesApp andActivate:app];
+    return response;
+  }
+
+  response = [FBElementCommands findAndTap:preferencesApp type:@"Cell" query:@"label" queryValue:@"Network Link Conditioner" useButtonTap:YES];
+  if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+    [self terminatePreferencesApp:preferencesApp andActivate:app];
+    return response;
+  }
+
+  NSArray *cells = [[preferencesApp cells] allElementsBoundByIndex];
+  if (cells.count == 0) {
+    [self terminatePreferencesApp:preferencesApp andActivate:app];
+    return FBResponseWithObject(@[]);
+  }
+  
+  NSMutableArray *ret = [[NSMutableArray alloc] init];
+  for (XCUIElement *cell in cells) {
+    NSString *label = cell.label;
+    if ([label caseInsensitiveCompare:@"Enable"] == NSOrderedSame ||
+        [label caseInsensitiveCompare:@"Add a profile…"] == NSOrderedSame) {
+      continue;
+    }
+    [ret addObject:label];
+  }
+  [self terminatePreferencesApp:preferencesApp andActivate:app];
+  return FBResponseWithObject(ret);
+}
+
++ (id<FBResponsePayload>)handleNetworkCondition:(FBRouteRequest *)request
+{
+  NSString *condition = request.arguments[@"condition"];
+  
+  XCUIApplication *app = [FBApplication fb_activeApplication];
+  NSArray *alerts = [[app alerts] allElementsBoundByIndex];
+  if (alerts.count > 0) {
+    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
+  }
+  
+  XCUIApplication *preferencesApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.Preferences"];
+  [preferencesApp launch];
+  FBResponseJSONPayload *response = nil;
+  
+  response = [FBElementCommands findAndTap:preferencesApp type:@"Cell" query:@"label" queryValue:@"Developer" useButtonTap:YES];
+  if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+    [self terminatePreferencesApp:preferencesApp andActivate:app];
+    return response;
+  }
+
+  response = [FBElementCommands findAndTap:preferencesApp type:@"Cell" query:@"label" queryValue:@"Network Link Conditioner" useButtonTap:YES];
+  if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+    [self terminatePreferencesApp:preferencesApp andActivate:app];
+    return response;
+  }
+  
+  XCUIElement *switchElem = nil;
+  while (switchElem == nil && switchElem.exists == NO) {
     [NSThread sleepForTimeInterval:0.5];
-    response = [FBElementCommands findAndTap:preferencesApp type:@"Cell" query:@"label" queryValue:preference useButtonTap:YES];
-    if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
-      if (UIInterfaceOrientationIsPortrait([app interfaceOrientation])) {
-        // launching the original app causes issues with navigation links if you go back and forth between settings app and the original app.
-        [FBElementCommands tapCoordinate:preferencesApp tapPoint:CGPointMake(15, 15)];
+    switchElem = [FBElementCommands find:preferencesApp type:@"Switch" query:@"label" queryValue:@"Enable"];
+  }
+  
+  BOOL isOn = NO;
+  if (switchElem) {
+    isOn = [switchElem.value integerValue] == 1;
+    if (condition == nil) {
+      if (isOn) {
+        [switchElem tap];
       }
-      else {
-        //  [[FBSession activeSession] launchApplicationWithBundleId:bundleId
-        //                         shouldWaitForQuiescence:@(YES)
-        //                                       arguments:nil
-        //                                     environment:nil];
-        
-        // landscape mode doesn't have the app navigation button
-        [app activate];
-      }
-      [preferencesApp terminate];
-      return response;
+      [self terminatePreferencesApp:preferencesApp andActivate:app];
+      return FBResponseWithOK();
     }
   }
-  XCUIElement *switchElem = nil;
-  while (switchElem == nil) {
-    [NSThread sleepForTimeInterval:0.5];
-    switchElem = [FBElementCommands find:preferencesApp type:@"Switch" query:@"label" queryValue:innerPreference];
+  else {
+    [self terminatePreferencesApp:preferencesApp andActivate:app];
+    return FBResponseWithStatus(FBCommandStatusUnhandled, [NSString stringWithFormat:@"Couldn't enable network link condition: %@", condition]);
   }
-  if (switchElem) {
-    BOOL isOn = [switchElem.value integerValue] == 1;
-    if (isOn != on) {
+  
+  XCUIElement *cellElem = [FBElementCommands find:preferencesApp type:@"Cell" query:@"label" queryValue:condition];
+  if (cellElem != nil && cellElem.exists) {
+    if (isOn == NO) {
       [switchElem tap];
     }
+    [cellElem tap];
   }
- 
+  else {
+    [self terminatePreferencesApp:preferencesApp andActivate:app];
+    return FBResponseWithStatus(FBCommandStatusUnhandled, [NSString stringWithFormat:@"Couldn't enable network link condition: %@", condition]);
+  }
+  [self terminatePreferencesApp:preferencesApp andActivate:app];
+  return FBResponseWithOK();
+}
+
++ (void)terminatePreferencesApp:(XCUIApplication *)preferencesApp andActivate:(XCUIApplication *)app {
   if (UIInterfaceOrientationIsPortrait([app interfaceOrientation])) {
     // launching the original app causes issues with navigation links if you go back and forth between settings app and the original app.
     [FBElementCommands tapCoordinate:preferencesApp tapPoint:CGPointMake(15, 15)];
@@ -684,8 +786,6 @@ static NSData *kLastImageData;
     [app activate];
   }
   [preferencesApp terminate];
-//  [[FBSession activeSession] terminateApplicationWithBundleId:@"com.apple.Preferences"];
-  return FBResponseWithOK();
 }
 
 @end
