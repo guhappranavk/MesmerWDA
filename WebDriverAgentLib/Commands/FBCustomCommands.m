@@ -694,7 +694,7 @@ static NSData *kLastImageData;
     [self terminatePreferencesApp:preferencesApp andActivate:app];
     return FBResponseWithObject(@[]);
   }
-  
+
   NSMutableArray *ret = [[NSMutableArray alloc] init];
   for (XCUIElement *cell in cells) {
     NSString *label = cell.label;
@@ -704,8 +704,15 @@ static NSData *kLastImageData;
     }
     [ret addObject:label];
   }
+  
+  XCUIElement *switchElem = nil;
+  while (switchElem == nil && switchElem.exists == NO) {
+    [NSThread sleepForTimeInterval:0.5];
+    switchElem = [FBElementCommands find:preferencesApp type:@"Switch" query:@"label" queryValue:@"Enable"];
+  }
+  BOOL enabled = [[switchElem value] integerValue] == 1;
   [self terminatePreferencesApp:preferencesApp andActivate:app];
-  return FBResponseWithObject(ret);
+  return FBResponseWithObject(@{@"enabled" : @(enabled), @"conditions" : ret});
 }
 
 + (id<FBResponsePayload>)handleNetworkCondition:(FBRouteRequest *)request
