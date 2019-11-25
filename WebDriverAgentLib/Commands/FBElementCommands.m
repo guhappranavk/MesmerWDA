@@ -471,7 +471,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
         // see if the device in landscape mode and translate the coordinates
         CGRect buttonFrame = button.frame;
         UIInterfaceOrientation orientation = FBApplication.fb_activeApplication.interfaceOrientation;
-        CGSize screenSize = FBAdjustDimensionsForApplication(application.frame.size, orientation);
+        CGSize screenSize = FBAdjustDimensionsForApplication(application.windows.fb_firstMatch.frame.size, orientation);
         CGPoint point = FBInvertPointForApplication(CGPointMake(buttonFrame.origin.x, buttonFrame.origin.y), screenSize, orientation);
         CGSize size = FBAdjustDimensionsForApplication(buttonFrame.size, orientation);
         buttonFrame = CGRectMake(point.x, point.y, size.width, size.height);
