@@ -466,7 +466,18 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     NSString *subtitle = texts.count > 1 ? [texts[1] label] : @"";
     NSArray *buttons = [[alert buttons] allElementsBoundByIndex];
     for (XCUIElement *button in buttons) {
-      if (CGRectContainsPoint(button.frame, tapPoint)) {
+      BOOL contains = CGRectContainsPoint(button.frame, tapPoint);
+      if (contains == NO) {
+        // see if the device in landscape mode and translate the coordinates
+        CGRect buttonFrame = button.frame;
+        UIInterfaceOrientation orientation = FBApplication.fb_activeApplication.interfaceOrientation;
+        CGSize screenSize = FBAdjustDimensionsForApplication(application.windows.fb_firstMatch.frame.size, orientation);
+        CGPoint point = FBInvertPointForApplication(CGPointMake(buttonFrame.origin.x, buttonFrame.origin.y), screenSize, orientation);
+        CGSize size = FBAdjustDimensionsForApplication(buttonFrame.size, orientation);
+        buttonFrame = CGRectMake(point.x, point.y, size.width, size.height);
+        contains = CGRectContainsPoint(buttonFrame, tapPoint);
+      }
+      if (contains == YES) {
         NSString *label = [button label];
 //        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
         [button tap];
@@ -524,7 +535,18 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     NSString *subtitle = texts.count > 1 ? [texts[1] label] : @"";
     NSArray *buttons = [[alert buttons] allElementsBoundByIndex];
     for (XCUIElement *button in buttons) {
-      if (CGRectContainsPoint(button.frame, tapPoint)) {
+      BOOL contains = CGRectContainsPoint(button.frame, tapPoint);
+      if (contains == NO) {
+        // see if the device in landscape mode and translate the coordinates
+        CGRect buttonFrame = button.frame;
+        UIInterfaceOrientation orientation = FBApplication.fb_activeApplication.interfaceOrientation;
+        CGSize screenSize = FBAdjustDimensionsForApplication(application.frame.size, orientation);
+        CGPoint point = FBInvertPointForApplication(CGPointMake(buttonFrame.origin.x, buttonFrame.origin.y), screenSize, orientation);
+        CGSize size = FBAdjustDimensionsForApplication(buttonFrame.size, orientation);
+        buttonFrame = CGRectMake(point.x, point.y, size.width, size.height);
+        contains = CGRectContainsPoint(buttonFrame, tapPoint);
+      }
+      if (contains == YES) {
         NSString *label = [button label];
 //        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
         [button tap];

@@ -387,7 +387,8 @@ static NSData *kLastImageData;
 {
   NSString *airplayServer = request.arguments[@"airplay"];
   BOOL wait = [request.arguments[@"wait"] boolValue];
-
+  BOOL restart = [request.arguments[@"restart"] boolValue];
+  
   if (airplayServer == nil) {
     airplayServer = @"MesmAir";
   }
@@ -418,6 +419,22 @@ static NSData *kLastImageData;
   }
   
   FBResponseJSONPayload *response = nil;
+  
+  if (restart) {
+    //stop if it is mirroring now
+    FBResponseJSONPayload *response = (FBResponseJSONPayload* _Nullable)[FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer useButtonTap:NO];
+    if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+      //try static text
+      response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:airplayServer useButtonTap:NO];
+    }
+    [NSThread sleepForTimeInterval:0.2];
+    response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:@"Stop Mirroring" useButtonTap:NO];
+    if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+      //try static text
+      [NSThread sleepForTimeInterval:0.2];
+      response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:@"Stop Mirroring" useButtonTap:NO];
+    }
+  }
   
   int i = 3;
   while (i >= 0) {
