@@ -130,4 +130,22 @@ static dispatch_once_t oncePayloadToken;
   return uuidValue.UUIDString;
 }
 
++ (NSDictionary *)alertSource:(XCUIElement *)alert withInfo:(NSString *)info {
+  NSMutableDictionary *ret = [[NSMutableDictionary alloc] init];
+  NSArray *texts = [[alert staticTexts] allElementsBoundByIndex];
+  NSString *title = [texts[0] label];
+  [ret setObject:title forKey:@"title"];
+  NSString *subtitle = texts.count > 1 ? [texts[1] label] : @"";
+  [ret setObject:subtitle forKey:@"subtitle"];
+  NSArray *buttons = [[alert buttons] allElementsBoundByIndex];
+  NSMutableArray *buttonsSource = [[NSMutableArray alloc] init];
+  for (XCUIElement *button in buttons) {
+    NSString *label = [button label];
+    CGRect frame = button.frame;
+    [buttonsSource addObject:@{@"button": label, @"frame" : @{@"x" : @(frame.origin.x), @"y" : @(frame.origin.y), @"width" : @(frame.size.width), @"height" : @(frame.size.height)}}];
+  }
+  [ret setObject:buttonsSource forKey:@"buttons"];
+  return @{@"info" : info, @"alert" : ret};
+}
+
 @end

@@ -26,6 +26,7 @@ static BOOL FBShouldUseCompactResponses = YES;
 static BOOL FBShouldWaitForQuiescence = NO;
 static NSString *FBElementResponseAttributes = @"type,label";
 static NSUInteger FBMaxTypingFrequency = 60;
+static BOOL FBShouldAnonymizeFullImagePaths = NO;
 
 @implementation FBConfiguration
 
@@ -135,6 +136,16 @@ static NSUInteger FBMaxTypingFrequency = 60;
 + (void)setShouldWaitForQuiescence:(BOOL)value
 {
   FBShouldWaitForQuiescence = value;
+}
+
++ (BOOL)shouldAnonymizeFullImagePaths
+{
+  return FBShouldAnonymizeFullImagePaths;
+}
+
++ (void)setShouldAnonymizeFullImagePaths:(BOOL)value
+{
+  FBShouldAnonymizeFullImagePaths = value;
 }
 
 #pragma mark Private

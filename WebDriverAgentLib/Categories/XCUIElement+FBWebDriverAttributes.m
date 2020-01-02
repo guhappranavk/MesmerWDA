@@ -19,6 +19,8 @@
 #import "XCUIElement.h"
 #import "XCUIElement+FBUtilities.h"
 #import "FBElementUtils.h"
+#import "FBMathUtils.h"
+#import "FBApplication.h"
 
 @implementation XCUIElement (WebDriverAttributesForwarding)
 
@@ -145,7 +147,11 @@ static NSMutableDictionary<NSNumber *, NSMutableDictionary<NSString *, NSMutable
     return [FBElementTypeTransformer stringWithElementType:self.elementType];
   };
   
-  return [self fb_cachedValueWithAttributeName:@"wdType" valueGetter:getter];
+  NSString *ret = [self fb_cachedValueWithAttributeName:@"wdType" valueGetter:getter];
+  if ([ret hasPrefix:@"Unknown"]) {
+    ret = @"XCUIElementTypeOther";
+  }
+  return ret;
 }
 
 - (NSString *)wdUID
@@ -236,13 +242,34 @@ static NSMutableDictionary<NSNumber *, NSMutableDictionary<NSString *, NSMutable
 
 - (NSDictionary *)wdRect
 {
+//  static CGRect appFrame;
+//  static dispatch_once_t onceToken;
+//  dispatch_once(&onceToken, ^{
+//    appFrame = FBApplication.fb_activeApplication.frame;
+//  });
   id (^getter)(void) = ^id(void) {
     CGRect frame = self.wdFrame;
+//    if ([FBApplication.fb_activeApplication.alerts allElementsBoundByIndex].count > 0) {
+//    UIInterfaceOrientation orientation = FBApplication.fb_activeApplication.interfaceOrientation;
+//    CGSize screenSize = FBAdjustDimensionsForApplication(appFrame.size, orientation);
+//    CGPoint point = FBInvertPointForApplication(CGPointMake(frame.origin.x, frame.origin.y), screenSize, orientation);
+//    CGSize size = FBAdjustDimensionsForApplication(frame.size, orientation);
+//      frame = CGRectMake(point.x, point.y, size.width, size.height);
+//    }
     return @{
+//      @"x": @(frame.origin.x),
+//      @"y": @(frame.origin.y),
+//      @"width": @(frame.size.width),
+//      @"height": @(frame.size.height),
+//      @"x": @(point.x),
+//      @"y": @(point.y),
+//      @"width": @(size.width),
+//      @"height": @(size.height),
       @"x": @(CGRectGetMinX(frame)),
       @"y": @(CGRectGetMinY(frame)),
       @"width": @(CGRectGetWidth(frame)),
       @"height": @(CGRectGetHeight(frame)),
+
     };
   };
   

@@ -17,6 +17,7 @@
 #import "FBRouteRequest.h"
 #import "FBRunLoopSpinner.h"
 #import "FBElementCache.h"
+#import "FBElementUtils.h"
 #import "FBErrorBuilder.h"
 #import "FBSession.h"
 #import "FBApplication.h"
@@ -78,6 +79,7 @@
     [[FBRoute POST:@"/wda/dragfromtoforduration2"] respondWithTarget:self action:@selector(handleDragCoordinate2:)],
     [[FBRoute POST:@"/wda/tap/:uuid"] respondWithTarget:self action:@selector(handleTap:)],
     [[FBRoute POST:@"/wda/tap"] respondWithTarget:self action:@selector(handleTapCoordinate:)],
+    [[FBRoute POST:@"/wda/findAndTap"] respondWithTarget:self action:@selector(handleFindAndTap:)],
     [[FBRoute POST:@"/wda/touchAndHold"] respondWithTarget:self action:@selector(handleTouchAndHoldCoordinate:)],
     [[FBRoute POST:@"/wda/doubleTap"] respondWithTarget:self action:@selector(handleDoubleTapCoordinate:)],
     [[FBRoute POST:@"/wda/keys"] respondWithTarget:self action:@selector(handleKeys:)],
@@ -341,7 +343,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
   NSArray *alerts = [[app alerts] allElementsBoundByIndex];
   if (alerts.count > 0) {
-    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
   }
   
   FBSession *session = request.session;
@@ -359,7 +361,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
   NSArray *alerts = [[app alerts] allElementsBoundByIndex];
   if (alerts.count > 0) {
-    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
   }
   
   //  FBSession *session = request.session;
@@ -456,7 +458,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   
   NSArray *allAlerts = [alerts arrayByAddingObjectsFromArray:appAlerts];
   
-  NSLog(@"### TIVO DEBUG 2: alerts count: %lu", (unsigned long)allAlerts.count);
+//  NSLog(@"### TIVO DEBUG 2: alerts count: %lu", (unsigned long)allAlerts.count);
   if (allAlerts.count > 0) {
     XCUIElement *alert = allAlerts[0];
     NSArray *texts = [[alert staticTexts] allElementsBoundByIndex];
@@ -466,7 +468,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     for (XCUIElement *button in buttons) {
       if (CGRectContainsPoint(button.frame, tapPoint)) {
         NSString *label = [button label];
-        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
+//        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
         [button tap];
         return FBResponseWithStatus(FBCommandStatusNoError, @{
                                                               @"action": @"tap",
@@ -485,7 +487,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     }
     
     if (allAlerts.count > 0) {
-      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alert withInfo:@"A modal dialog was open, blocking this operation"]);
     }
   }
   
@@ -514,7 +516,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   
   NSArray *allAlerts = [alerts arrayByAddingObjectsFromArray:appAlerts];
   
-  NSLog(@"### TIVO DEBUG 2: alerts count: %lu", (unsigned long)allAlerts.count);
+//  NSLog(@"### TIVO DEBUG 2: alerts count: %lu", (unsigned long)allAlerts.count);
   if (allAlerts.count > 0) {
     XCUIElement *alert = allAlerts[0];
     NSArray *texts = [[alert staticTexts] allElementsBoundByIndex];
@@ -524,7 +526,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     for (XCUIElement *button in buttons) {
       if (CGRectContainsPoint(button.frame, tapPoint)) {
         NSString *label = [button label];
-        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
+//        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
         [button tap];
         return FBResponseWithStatus(FBCommandStatusNoError, @{
                                                               @"action": @"tap",
@@ -543,7 +545,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     }
     
     if (allAlerts.count > 0) {
-      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, @"A modal dialog was open, blocking this operation");
+      return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:allAlerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
     }
   }
     
@@ -553,7 +555,7 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   return FBResponseWithOK();
 }
 
-+ (void)tapCoordinate:(FBApplication *)application tapPoint:(CGPoint)tapPoint {
++ (void)tapCoordinate:(XCUIApplication *)application tapPoint:(CGPoint)tapPoint {
   XCUICoordinate *tapCoordinate = [self.class gestureCoordinateWithCoordinate:tapPoint application:application shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
   [tapCoordinate tap];
 }
@@ -830,31 +832,31 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
   return [ret integerValue];
 }
 
-+ (BOOL)find:(FBApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue {
++ (id)find:(XCUIApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue {
   if (type == nil) {
-    return NO;
+    return nil;
   }
   
   XCUIElementType elementType = [self elementTypeFromName:type];
   if (elementType == (XCUIElementType)-1) {
-    return NO;
+    return nil;
   }
   
   //  if (elementType != XCUIElementTypeOther) {
   //    NSArray <XCUIElement *> *children = [application descendantsMatchingType:elementType].allElementsBoundByIndex;
   
-  NSString *matchString = [NSString stringWithFormat: @".*\\b%@.*", queryValue];
+  NSString *matchString = [NSString stringWithFormat: @".*\\b%@", queryValue];
   NSString *predicateString = [NSString stringWithFormat:@"%@ MATCHES[c] %%@", query];
   
   NSPredicate *predicate = [NSPredicate predicateWithFormat: predicateString, matchString];
   XCUIElement *element = [[application descendantsMatchingType:elementType] elementMatchingPredicate:predicate];
   if ([element exists]) {
-    return YES;
+    return element;
   }
-  return NO;
+  return nil;
 }
 
-+ (id<FBResponsePayload>)findAndTap:(FBApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue useButtonTap:(BOOL)useButtonTap {
++ (id<FBResponsePayload>)findAndTap:(XCUIApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue useButtonTap:(BOOL)useButtonTap {
   if (type == nil) {
     return FBResponseWithErrorFormat(@"type is missing");
   }
@@ -872,7 +874,7 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
   
   NSPredicate *predicate = [NSPredicate predicateWithFormat: predicateString, matchString];
   XCUIElement *element = [[application descendantsMatchingType:elementType] elementMatchingPredicate:predicate];
-  if ([element exists]) {
+  if ([element exists]) { //} && [element isEnabled]) {
     //      NSString *wdname = element.wdName;
     //      NSString *wdvalue = element.wdValue;
     //      id evalue = element.value;
@@ -922,6 +924,6 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
     //      }
     //    }
   }
-  return FBResponseWithErrorFormat(@"Not found");
+  return FBResponseWithErrorFormat(@"%@ not found or not enabled", queryValue);
 }
 @end

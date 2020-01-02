@@ -29,24 +29,19 @@
 
 + (instancetype)fb_activeApplication
 {
-  [[[FBRunLoopSpinner new]
-    timeout:5]
-   spinUntilTrue:^BOOL{
-     return [[XCAXClient_iOS sharedClient] activeApplications].count == 1;
-   }];
+  //  [[[FBRunLoopSpinner new]
+  //    timeout:5]
+  //   spinUntilTrue:^BOOL{
+  //     return [[XCAXClient_iOS sharedClient] activeApplications].count == 1;
+  //   }];
 
-  XCAccessibilityElement *activeApplicationElement = [[[XCAXClient_iOS sharedClient] activeApplications] firstObject];
-  if (!activeApplicationElement) {
-    return nil;
-  }
-  FBApplication *application = [FBApplication fb_applicationWithPID:activeApplicationElement.processIdentifier];
-  NSAssert(nil != application, @"Active application instance is not expected to be equal to nil", nil);
-  if (!application.fb_isActivateSupported) {
-    // This is needed for Xcode8 compatibility
-    [application query];
-    [application resolve];
-  }
-  return application;
+    XCAccessibilityElement *activeApplicationElement = [[[XCAXClient_iOS sharedClient] activeApplications] firstObject];
+    if (!activeApplicationElement) {
+      return nil;
+    }
+    FBApplication *application = [FBApplication fb_applicationWithPID:activeApplicationElement.processIdentifier];
+    NSAssert(nil != application, @"Active application instance is not expected to be equal to nil", nil);
+    return application;
 }
 
 + (instancetype)fb_systemApplication
