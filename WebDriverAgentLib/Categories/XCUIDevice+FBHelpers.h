@@ -74,7 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param error If there is an error, upon return contains an NSError object that describes the problem.
  @return Device screenshot as PNG-encoded data or nil in case of failure
  */
-- (nullable NSData *)fb_screenshotHighWithError:(NSError*__autoreleasing*)error;
+- (NSData *)fb_screenshotHighWithError:(NSError*__autoreleasing*)error width:(CGFloat)width height:(CGFloat)height;
 
 /**
  Returns screenshot image object

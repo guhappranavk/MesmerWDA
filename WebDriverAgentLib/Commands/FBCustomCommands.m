@@ -322,7 +322,7 @@ static NSData *kLastImageData;
 + (void)performScreenCast:(NSTimer*)timer {
   //  dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
   NSError *error = nil;
-  NSData *screenshotData = [[XCUIDevice sharedDevice] fb_screenshotHighWithError:&error quality:0.0 type:@"jpeg"];
+  NSData *screenshotData = [[XCUIDevice sharedDevice] fb_screenshotHighWithError:&error width:0.0 height:0.0];// quality:0.0 type:@"jpeg"];
   if (screenshotData != nil && error == nil) {
     if ([kLastImageData isEqualToData:screenshotData]) {
       return;

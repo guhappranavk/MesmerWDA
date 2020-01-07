@@ -11,6 +11,7 @@
 
 #import "XCUIDevice+FBHelpers.h"
 #import "BSWDataModelHandler.h"
+#import "FBRouteRequest.h"
 
 @implementation FBScreenshotCommands
 
@@ -22,6 +23,7 @@
   @[
     [[FBRoute GET:@"/screenshot"].withoutSession respondWithTarget:self action:@selector(handleGetScreenshot:)],
     [[FBRoute GET:@"/screenshotHigh"].withoutSession respondWithTarget:self action:@selector(handleGetScreenshotHigh:)],
+    [[FBRoute GET:@"/screenshotHigh/width/:width/height/:height"].withoutSession respondWithTarget:self action:@selector(handleGetScreenshotHigh:)],
     [[FBRoute GET:@"/screenClassification"].withoutSession respondWithTarget:self action:@selector(handleGetScreenshotClassification:)],
     [[FBRoute GET:@"/screenshot"] respondWithTarget:self action:@selector(handleGetScreenshot:)],
   ];
@@ -43,8 +45,11 @@
 
 + (id<FBResponsePayload>)handleGetScreenshotHigh:(FBRouteRequest *)request
 {
+  CGFloat width = [request.parameters[@"width"] floatValue];
+  CGFloat height = [request.parameters[@"height"] floatValue];
   NSError *error;
-  NSData *screenshotData = [[XCUIDevice sharedDevice] fb_screenshotHighWithError:&error];
+  NSData *screenshotData = [[XCUIDevice sharedDevice] fb_screenshotHighWithError:&error width:width height:height];
+  
   if (nil == screenshotData) {
     return FBResponseWithError(error);
   }
