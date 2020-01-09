@@ -148,7 +148,8 @@ static bool fb_isLocked;
   UIImage *rotatedImage = [self rotateInNeeded:screenImage];
   
   if (width > 0.0 && height > 0.0) {
-    rotatedImage = [self scaleToSize:rotatedImage size:CGSizeMake(width, height)];
+    UIImage *scaledImage = [self scaleToSize:rotatedImage size:CGSizeMake(width, height)];
+    return UIImagePNGRepresentation(scaledImage);
   }
   return UIImagePNGRepresentation(rotatedImage);
 }
