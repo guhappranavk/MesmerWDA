@@ -120,7 +120,7 @@ static bool fb_isLocked;
   return FBAdjustScreenshotOrientationForApplication(imageData, orientation);
 }
 
-- (NSData *)fb_screenshotHighWithError:(NSError*__autoreleasing*)error
+- (NSData *)fb_screenshotHighWithError:(NSError*__autoreleasing*)error width:(CGFloat)width height:(CGFloat)height
 {
   Class xcScreenClass = objc_lookUpClass("XCUIScreen");
   if (nil == xcScreenClass) {
@@ -143,8 +143,15 @@ static bool fb_isLocked;
   //  return [mainScreen screenshotDataForQuality:quality rect:screenRect error:error];
   
   XCUIScreenshot *screenshot = [mainScreen screenshot];
-  NSData *result = [screenshot PNGRepresentation];
-  return result;
+  
+  UIImage *screenImage = [screenshot image];
+  UIImage *rotatedImage = [self rotateInNeeded:screenImage];
+  
+  if (width > 0.0 && height > 0.0) {
+    UIImage *scaledImage = [self scaleToSize:rotatedImage size:CGSizeMake(width, height)];
+    return UIImagePNGRepresentation(scaledImage);
+  }
+  return UIImagePNGRepresentation(rotatedImage);
 }
 
 - (UIImage *)fb_screenshotImageWithError:(NSError*__autoreleasing*)error
@@ -244,6 +251,50 @@ static bool fb_isLocked;
     name = "com.apple.BiometricKit_Sim.fingerTouch.nomatch";
   }
   return notify_post(name) == NOTIFY_STATUS_OK;
+}
+
+- (UIImage*)rotateInNeeded:(UIImage *)image {
+  CGSize size = image.size;
+  UIImageOrientation orientation = image.imageOrientation;
+  
+  if (size.width > size.height && orientation != UIImageOrientationUp) {
+    // new devices are not properly orienting the image
+    // rotate it
+    CGFloat degrees = 0.0f;
+    if (orientation == UIImageOrientationLeft) {
+      degrees = -90;
+    }
+    else if (orientation == UIImageOrientationRight) {
+      degrees = 90;
+    }
+    
+    CGAffineTransform t = CGAffineTransformMakeRotation(degrees * M_PI / 180);
+    CGRect originalImageRect = CGRectMake(0, 0, image.size.width, image.size.height);
+    CGRect rotatedImageRect = CGRectApplyAffineTransform(originalImageRect, t);
+    CGSize rotatedSize = rotatedImageRect.size;
+    UIGraphicsBeginImageContext(rotatedSize);
+    
+    CGContextRef bitmap = UIGraphicsGetCurrentContext();
+    CGContextTranslateCTM(bitmap, rotatedSize.width/2, rotatedSize.height/2);
+    
+    CGContextRotateCTM(bitmap, degrees * M_PI / 180);
+    CGContextScaleCTM(bitmap, 1.0, -1.0);
+    
+    CGContextDrawImage(bitmap, CGRectMake(-image.size.width / 2, -image.size.height / 2, image.size.width, image.size.height), [image CGImage]);
+    
+    UIImage *rotatedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return rotatedImage;
+  }
+  return image;
+}
+
+- (UIImage *)scaleToSize:(UIImage *)image size:(CGSize)size {
+  UIGraphicsBeginImageContextWithOptions(size, false, 1.0);
+  [image drawInRect:CGRectMake(0, 0, size.width, size.height)];
+  UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  return newImage;
 }
 
 - (NSString *)fb_usbIPAddress
