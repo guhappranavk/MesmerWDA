@@ -350,10 +350,15 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   CGPoint startPoint = CGPointMake((CGFloat)[request.arguments[@"fromX"] doubleValue], (CGFloat)[request.arguments[@"fromY"] doubleValue]);
   CGPoint endPoint = CGPointMake((CGFloat)[request.arguments[@"toX"] doubleValue], (CGFloat)[request.arguments[@"toY"] doubleValue]);
   NSTimeInterval duration = [request.arguments[@"duration"] doubleValue];
-  XCUICoordinate *endCoordinate = [self.class gestureCoordinateWithCoordinate:endPoint application:session.activeApplication shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
-  XCUICoordinate *startCoordinate = [self.class gestureCoordinateWithCoordinate:startPoint application:session.activeApplication shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
-  [startCoordinate pressForDuration:duration thenDragToCoordinate:endCoordinate];
+  [self drag:startPoint endPoint:endPoint duration:duration];
   return FBResponseWithOK();
+}
+
++ (void)drag:(CGPoint)startPoint endPoint:(CGPoint)endPoint duration:(double)duration {
+  FBApplication *app = [FBApplication fb_activeApplication];
+  XCUICoordinate *endCoordinate = [self.class gestureCoordinateWithCoordinate:endPoint application:app shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
+  XCUICoordinate *startCoordinate = [self.class gestureCoordinateWithCoordinate:startPoint application:app shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
+  [startCoordinate pressForDuration:duration thenDragToCoordinate:endCoordinate];
 }
 
 + (id<FBResponsePayload>)handleDragCoordinate2:(FBRouteRequest *)request
