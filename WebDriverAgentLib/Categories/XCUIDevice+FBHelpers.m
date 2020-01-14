@@ -145,8 +145,10 @@ static bool fb_isLocked;
   XCUIScreenshot *screenshot = [mainScreen screenshot];
   
   UIImage *screenImage = [screenshot image];
-  UIImage *rotatedImage = [self rotateInNeeded:screenImage];
+  UIImage *rotatedImage = screenImage; // [self rotateInNeeded:screenImage];
   
+  width = width <= 0.0 ? screenImage.size.width : width;
+  height = height <= 0.0 ? screenImage.size.height : height;
   if (width > 0.0 && height > 0.0) {
     UIImage *scaledImage = [self scaleToSize:rotatedImage size:CGSizeMake(width, height)];
     return UIImagePNGRepresentation(scaledImage);
