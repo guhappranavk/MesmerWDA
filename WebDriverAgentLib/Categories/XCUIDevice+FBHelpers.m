@@ -145,15 +145,16 @@ static bool fb_isLocked;
   XCUIScreenshot *screenshot = [mainScreen screenshot];
   
   UIImage *screenImage = [screenshot image];
-  UIImage *rotatedImage = screenImage; // [self rotateInNeeded:screenImage];
-  
+
+  if (width <= 0.0 || height <= 0.0) {
+    if (screenImage.size.height > screenImage.size.width) {
+          return UIImagePNGRepresentation(screenImage);
+    }
+  }
   width = width <= 0.0 ? screenImage.size.width : width;
   height = height <= 0.0 ? screenImage.size.height : height;
-  if (width > 0.0 && height > 0.0) {
-    UIImage *scaledImage = [self scaleToSize:rotatedImage size:CGSizeMake(width, height)];
-    return UIImagePNGRepresentation(scaledImage);
-  }
-  return UIImagePNGRepresentation(rotatedImage);
+  UIImage *scaledImage = [self scaleToSize:screenImage size:CGSizeMake(width, height)];
+  return UIImagePNGRepresentation(scaledImage);
 }
 
 - (UIImage *)fb_screenshotImageWithError:(NSError*__autoreleasing*)error
