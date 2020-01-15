@@ -151,8 +151,8 @@ static bool fb_isLocked;
           return UIImagePNGRepresentation(screenImage);
     }
   }
-  width = width <= 0.0 ? screenImage.size.width : width;
-  height = height <= 0.0 ? screenImage.size.height : height;
+  width = width <= 0.0 ? screenImage.size.width : width/[UIScreen mainScreen].nativeScale;
+  height = height <= 0.0 ? screenImage.size.height : height/[UIScreen mainScreen].nativeScale;
   UIImage *scaledImage = [self scaleToSize:screenImage size:CGSizeMake(width, height)];
   return UIImagePNGRepresentation(scaledImage);
 }
@@ -293,7 +293,7 @@ static bool fb_isLocked;
 }
 
 - (UIImage *)scaleToSize:(UIImage *)image size:(CGSize)size {
-  UIGraphicsBeginImageContextWithOptions(size, false, 1.0);
+  UIGraphicsBeginImageContextWithOptions(size, false, [UIScreen mainScreen].nativeScale);
   [image drawInRect:CGRectMake(0, 0, size.width, size.height)];
   UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
