@@ -601,9 +601,27 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
 {
   NSString *textToType = [request.arguments[@"value"] componentsJoinedByString:@""];
   NSUInteger frequency = [request.arguments[@"frequency"] unsignedIntegerValue] ?: [FBConfiguration maxTypingFrequency];
+  BOOL debug = [request.arguments[@"debug"] boolValue];
+
   NSError *error;
   if (![FBKeyboard typeText:textToType frequency:frequency error:&error]) {
+    [FBLogger logFmt:@"/keys failed to type %@ with error: %@", textToType, error];
     return FBResponseWithError(error);
+  }
+  if (debug) {
+    FBApplication *application = [FBApplication fb_activeApplication];
+    NSArray *textFields = [[application textFields] allElementsBoundByIndex];
+    NSArray *searchFields = [[application searchFields] allElementsBoundByIndex];
+    NSArray *secureTextFields = [[application secureTextFields] allElementsBoundByIndex];
+    NSArray *fields = [[textFields arrayByAddingObjectsFromArray:searchFields] arrayByAddingObjectsFromArray:secureTextFields];
+    if (fields.count > 0) {
+      for (XCUIElement *textField in fields) {
+        if (textField.hasKeyboardFocus) {
+          NSString *text = textField.value;
+          [FBLogger logFmt:@"/keys typed %@ and read %@", textToType, text];
+        }
+      }
+    }
   }
   return FBResponseWithOK();
 }
