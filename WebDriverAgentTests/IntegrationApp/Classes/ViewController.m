@@ -56,4 +56,12 @@
   self.orentationLabel.text = orientation;
 }
 
+- (IBAction)textEditingDidEnd:(UITextField *)sender {
+  UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Password Content" message:[sender text] preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    [alert dismissViewControllerAnimated:YES completion:nil];
+  }]];
+  [self presentViewController:alert animated:YES completion:nil];
+}
+
 @end

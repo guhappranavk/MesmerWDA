@@ -27,15 +27,17 @@
 
 - (void)testTextTyping
 {
-  NSString *text = @"Happy typing";
-  XCUIElement *textField = self.testedApplication.textFields[@"aIdentifier"];
-  [textField tap];
+  NSString *text = @"Happytyping";
+  XCUIElement *passwordField = self.testedApplication.secureTextFields[@"password"];
+  [passwordField tap];
   NSError *error;
   XCTAssertTrue([FBKeyboard waitUntilVisibleForApplication:self.testedApplication timeout:1 error:&error]);
   XCTAssertNil(error);
-  XCTAssertTrue([FBKeyboard typeText:text error:&error]);
+  XCTAssertTrue([FBKeyboard typeText:text frequency:240 error:&error]);
   XCTAssertNil(error);
-  XCTAssertEqualObjects(textField.value, text);
+  XCUIElement *textField = self.testedApplication.textFields[@"aIdentifier"];
+  [textField tap];
+
 }
 
 - (void)testKeyboardPresenceVerification
