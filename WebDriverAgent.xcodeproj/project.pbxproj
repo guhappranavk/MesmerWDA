@@ -16,6 +16,10 @@
 		25BD14FB22D80BEA0097DE12 /* BSWDataModelHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = 25BD14F822D80BEA0097DE12 /* BSWDataModelHandler.mm */; };
 		25BD14FD22D80C3A0097DE12 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 25BD14FC22D80C3A0097DE12 /* Accelerate.framework */; };
 		25BD14FF22D811190097DE12 /* labels.txt in Resources */ = {isa = PBXBuildFile; fileRef = 25BD14FE22D811190097DE12 /* labels.txt */; };
+		4762398D23D1A24F00271BBD /* WebDriverAgentLib.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = EE158A991CBD452B00A3E3F0 /* WebDriverAgentLib.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4762398E23D1A25600271BBD /* CocoaAsyncSocket.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 710181F7211DF584002FD3A8 /* CocoaAsyncSocket.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4762398F23D1A25D00271BBD /* RoutingHTTPServer.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = AD42DD2B1CF1238500806E5D /* RoutingHTTPServer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4762399023D1A26D00271BBD /* YYCache.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = E456BF72206BC17F00963F9F /* YYCache.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		710181F8211DF584002FD3A8 /* CocoaAsyncSocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 710181F7211DF584002FD3A8 /* CocoaAsyncSocket.framework */; };
 		71018201211DF62C002FD3A8 /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 71018200211DF62C002FD3A8 /* libxml2.tbd */; };
 		7101820D211E026B002FD3A8 /* libAccessibility.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 7101820C211E026B002FD3A8 /* libAccessibility.tbd */; };
@@ -436,6 +440,20 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		4762398C23D1A23C00271BBD /* Copy Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				4762399023D1A26D00271BBD /* YYCache.framework in Copy Frameworks */,
+				4762398F23D1A25D00271BBD /* RoutingHTTPServer.framework in Copy Frameworks */,
+				4762398E23D1A25600271BBD /* CocoaAsyncSocket.framework in Copy Frameworks */,
+				4762398D23D1A24F00271BBD /* WebDriverAgentLib.framework in Copy Frameworks */,
+			);
+			name = "Copy Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EE93CFF41CCA501300708122 /* Copy frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1828,7 +1846,7 @@
 			buildPhases = (
 				EE9B75E81CF7956C00275851 /* Sources */,
 				EE9B75E91CF7956C00275851 /* Frameworks */,
-				EE9B75EA1CF7956C00275851 /* Resources */,
+				4762398C23D1A23C00271BBD /* Copy Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1957,13 +1975,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				EE9B76941CF7997600275851 /* Main.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		EE9B75EA1CF7956C00275851 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -33,7 +33,7 @@
   NSError *error;
   XCTAssertTrue([FBKeyboard waitUntilVisibleForApplication:self.testedApplication timeout:1 error:&error]);
   XCTAssertNil(error);
-  XCTAssertTrue([FBKeyboard typeText:text frequency:240 error:&error]);
+  XCTAssertTrue([FBKeyboard typeText:text error:&error]);
   XCTAssertNil(error);
   XCUIElement *textField = self.testedApplication.textFields[@"aIdentifier"];
   [textField tap];
