@@ -613,12 +613,14 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     NSArray *textFields = [[application textFields] allElementsBoundByIndex];
     NSArray *searchFields = [[application searchFields] allElementsBoundByIndex];
     NSArray *secureTextFields = [[application secureTextFields] allElementsBoundByIndex];
-    NSArray *fields = [[textFields arrayByAddingObjectsFromArray:searchFields] arrayByAddingObjectsFromArray:secureTextFields];
+    NSArray *textViews = [[application textViews] allElementsBoundByIndex];
+    NSArray *fields = [[[textFields arrayByAddingObjectsFromArray:searchFields] arrayByAddingObjectsFromArray:secureTextFields] arrayByAddingObjectsFromArray:textViews];
     if (fields.count > 0) {
       for (XCUIElement *textField in fields) {
         if (textField.hasKeyboardFocus) {
           NSString *text = textField.value;
           [FBLogger logFmt:@"/keys typed %@ and read %@", textToType, text];
+          break;
         }
       }
     }
