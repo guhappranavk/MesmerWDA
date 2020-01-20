@@ -22,7 +22,7 @@
 {
   [super setUp];
   [self launchApplication];
-  [self goToAttributesPage];
+//  [self goToAttributesPage];
 }
 
 - (void)testTextTyping
@@ -38,6 +38,20 @@
   XCUIElement *textField = self.testedApplication.textFields[@"aIdentifier"];
   [textField tap];
 
+}
+
+- (void)testTextTyping_Webview {
+  [self.testedApplication.buttons[@"Webview"] tap];
+  NSString *text = @"msmr1@cablecoc\b\b\bco/\b.com";
+  
+  XCUIElement *userNameField = self.testedApplication.textFields[@"Enter email"];
+  [userNameField tap];
+  NSError *error;
+  XCTAssertTrue([FBKeyboard waitUntilVisibleForApplication:self.testedApplication timeout:1 error:&error]);
+  XCTAssertNil(error);
+  XCTAssertTrue([FBKeyboard typeText:text error:&error]);
+  XCTAssertNil(error);
+  
 }
 
 - (void)testKeyboardPresenceVerification

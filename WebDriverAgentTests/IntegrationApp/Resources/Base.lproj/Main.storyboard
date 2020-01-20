@@ -66,17 +66,30 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oS4-mb-h6h">
+                                <rect key="frame" x="130" y="254" width="64" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="7Aa-SA-hAf"/>
+                                </constraints>
+                                <state key="normal" title="Webview"/>
+                                <connections>
+                                    <segue destination="zE6-gR-Dmo" kind="show" id="QGT-ZD-eY4"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <accessibility key="accessibilityConfiguration" label="MainView"/>
                         <constraints>
                             <constraint firstItem="YgP-SF-TkS" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="41Q-cm-l5K"/>
+                            <constraint firstItem="oS4-mb-h6h" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="114" id="6ht-je-9jx"/>
                             <constraint firstItem="S56-6U-3gG" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="8UW-Nz-F04"/>
                             <constraint firstItem="nbp-zX-Om1" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Ahr-dg-qwa"/>
                             <constraint firstItem="nbp-zX-Om1" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="29" id="GcP-yp-Ze6"/>
                             <constraint firstItem="uiD-R4-b34" firstAttribute="top" secondItem="S56-6U-3gG" secondAttribute="bottom" constant="8" id="SPc-4k-0MA"/>
                             <constraint firstItem="M2N-Yn-ytb" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Yr3-Lt-qdn"/>
+                            <constraint firstItem="oS4-mb-h6h" firstAttribute="top" secondItem="uiD-R4-b34" secondAttribute="bottom" constant="8" id="anr-Jx-aGq"/>
                             <constraint firstItem="YgP-SF-TkS" firstAttribute="top" secondItem="nbp-zX-Om1" secondAttribute="bottom" constant="8" id="b56-i5-Lxo"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="oS4-mb-h6h" secondAttribute="trailing" constant="110" id="mfy-Nq-RMg"/>
                             <constraint firstItem="uiD-R4-b34" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="nFx-Xr-rGC"/>
                             <constraint firstItem="S56-6U-3gG" firstAttribute="top" secondItem="M2N-Yn-ytb" secondAttribute="bottom" constant="8" id="rMW-LW-ejO"/>
                             <constraint firstItem="M2N-Yn-ytb" firstAttribute="top" secondItem="YgP-SF-TkS" secondAttribute="bottom" constant="8" id="tMN-gl-smg"/>
@@ -123,7 +136,7 @@
                                 <rect key="frame" x="16" y="55" width="288" height="34"/>
                                 <accessibility key="accessibilityConfiguration" identifier="password" label=""/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" secureTextEntry="YES" textContentType="password"/>
+                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="go" secureTextEntry="YES" textContentType="password"/>
                                 <connections>
                                     <action selector="textEditingDidEnd:" destination="65L-2T-0zt" eventType="editingDidEnd" id="csm-LL-AOz"/>
                                     <outlet property="delegate" destination="65L-2T-0zt" id="BRa-Xv-Ud1"/>
@@ -541,6 +554,38 @@
                 <customObject id="Vxa-lD-ODn" customClass="FBTableDataSource"/>
             </objects>
             <point key="canvasLocation" x="2302" y="746"/>
+        </scene>
+        <!--Web Kit View Controller-->
+        <scene sceneID="ot8-3h-nq8">
+            <objects>
+                <viewController id="zE6-gR-Dmo" customClass="WebKitViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="xbW-gE-LVb"/>
+                        <viewControllerLayoutGuide type="bottom" id="7Ja-0A-PFG"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="U9H-wo-T8e">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <wkWebView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Nnl-7h-oAS">
+                                <rect key="frame" x="0.0" y="44" width="320" height="524"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <wkWebViewConfiguration key="configuration">
+                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
+                                    <wkPreferences key="preferences"/>
+                                </wkWebViewConfiguration>
+                            </wkWebView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="XxJ-Ez-Ryg"/>
+                    <connections>
+                        <outlet property="webView" destination="Nnl-7h-oAS" id="0WA-kW-sqU"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Pcs-c6-7Oi" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="82.5" y="1461.9718309859154"/>
         </scene>
     </scenes>
 </document>
