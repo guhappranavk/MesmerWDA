@@ -16,6 +16,7 @@
 		25BD14FB22D80BEA0097DE12 /* BSWDataModelHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = 25BD14F822D80BEA0097DE12 /* BSWDataModelHandler.mm */; };
 		25BD14FD22D80C3A0097DE12 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 25BD14FC22D80C3A0097DE12 /* Accelerate.framework */; };
 		25BD14FF22D811190097DE12 /* labels.txt in Resources */ = {isa = PBXBuildFile; fileRef = 25BD14FE22D811190097DE12 /* labels.txt */; };
+		47467A0323D9495A009E66D4 /* MesmerAllStateTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 47467A0223D9495A009E66D4 /* MesmerAllStateTests.m */; };
 		4762398D23D1A24F00271BBD /* WebDriverAgentLib.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = EE158A991CBD452B00A3E3F0 /* WebDriverAgentLib.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4762398E23D1A25600271BBD /* CocoaAsyncSocket.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 710181F7211DF584002FD3A8 /* CocoaAsyncSocket.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4762398F23D1A25D00271BBD /* RoutingHTTPServer.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = AD42DD2B1CF1238500806E5D /* RoutingHTTPServer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -499,6 +500,7 @@
 		25BD14FC22D80C3A0097DE12 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		25BD14FE22D811190097DE12 /* labels.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = labels.txt; sourceTree = "<group>"; };
 		44757A831D42CE8300ECF35E /* XCUIDeviceRotationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XCUIDeviceRotationTests.m; sourceTree = "<group>"; };
+		47467A0223D9495A009E66D4 /* MesmerAllStateTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MesmerAllStateTests.m; sourceTree = "<group>"; };
 		4762399123D1F07A00271BBD /* WebKitViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebKitViewController.h; sourceTree = "<group>"; };
 		4762399223D1F07A00271BBD /* WebKitViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WebKitViewController.m; sourceTree = "<group>"; };
 		4762399523D1F2FA00271BBD /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -1323,6 +1325,7 @@
 				71E504941DF59BAD0020C32A /* XCUIElementAttributesTests.m */,
 				EEBBD48D1D4785FC00656A81 /* XCUIElementFBFindTests.m */,
 				EE1E06E11D181CC9007CF043 /* XCUIElementHelperIntegrationTests.m */,
+				47467A0223D9495A009E66D4 /* MesmerAllStateTests.m */,
 			);
 			path = IntegrationTests;
 			sourceTree = "<group>";
@@ -2174,6 +2177,7 @@
 			files = (
 				EE26409D1D0EBA25009BE6B0 /* FBElementAttributeTests.m in Sources */,
 				7119E1EC1E891F8600D0B125 /* FBPickerWheelSelectTests.m in Sources */,
+				47467A0323D9495A009E66D4 /* MesmerAllStateTests.m in Sources */,
 				EE1E06DA1D1808C2007CF043 /* FBIntegrationTestCase.m in Sources */,
 				EE05BAFA1D13003C00A3EB00 /* FBKeyboardTests.m in Sources */,
 				EE55B3271D1D54CF003AAAEC /* FBScrollingTests.m in Sources */,
