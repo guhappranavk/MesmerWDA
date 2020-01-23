@@ -15,6 +15,10 @@
 
 @implementation ViewController
 
+- (void)viewWillAppear:(BOOL)animated {
+  [[UIDevice currentDevice] setValue:[NSNumber numberWithInt:UIDeviceOrientationPortrait] forKey:@"orientation"];
+}
+
 - (IBAction)deadlockApp:(id)sender
 {
   dispatch_sync(dispatch_get_main_queue(), ^{
@@ -53,7 +57,7 @@
       orientation = @"Unknown";
       break;
   }
-  self.orentationLabel.text = orientation;
+  self.orentationLabel.text = [NSString stringWithFormat:@"CURRENT ORIENTATION: %@", orientation];
 }
 
 - (IBAction)textEditingDidEnd:(UITextField *)sender {
