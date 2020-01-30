@@ -305,7 +305,7 @@ static bool fb_isLocked;
   NSString *ip = [self fb_usbIPAddressInternal];
   static int i = 0;
   while (ip == nil) {
-//    NSLog(@"#### trying to get usb interface: %d", ++i);
+    NSLog(@"#### trying to get usb interface: %d", ++i);
     [NSThread sleepForTimeInterval:1];
     ip = [self fb_usbIPAddressInternal];
   }
