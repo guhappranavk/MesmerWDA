@@ -48,9 +48,9 @@ CGPoint FBInvertPointForApplication(CGPoint point, CGSize screenSize, UIInterfac
       return point;
     case UIInterfaceOrientationPortraitUpsideDown:
       return CGPointMake(screenSize.width - point.x, screenSize.height - point.y);
-    case UIInterfaceOrientationLandscapeLeft:
-      return CGPointMake(point.y, screenSize.height - point.x);
     case UIInterfaceOrientationLandscapeRight:
+      return CGPointMake(point.y, screenSize.height - point.x);
+    case UIInterfaceOrientationLandscapeLeft:
       return CGPointMake(screenSize.width - point.y, point.x);
   }
 }

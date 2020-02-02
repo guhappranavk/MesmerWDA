@@ -329,7 +329,7 @@ static NSData *kLastImageData;
 + (void)performScreenCast:(NSTimer*)timer {
   //  dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
   NSError *error = nil;
-  NSData *screenshotData = [[XCUIDevice sharedDevice] fb_screenshotHighWithError:&error quality:0.0 type:@"jpeg"];
+  NSData *screenshotData = [[XCUIDevice sharedDevice] fb_screenshotHighWithError:&error width:0.0 height:0.0];// quality:0.0 type:@"jpeg"];
   if (screenshotData != nil && error == nil) {
     if ([kLastImageData isEqualToData:screenshotData]) {
       return;
@@ -387,7 +387,8 @@ static NSData *kLastImageData;
 {
   NSString *airplayServer = request.arguments[@"airplay"];
   BOOL wait = [request.arguments[@"wait"] boolValue];
-
+  BOOL restart = [request.arguments[@"restart"] boolValue];
+  
   if (airplayServer == nil) {
     airplayServer = @"MesmAir";
   }
@@ -403,12 +404,20 @@ static NSData *kLastImageData;
 //  FBApplication *application = [FBApplication fb_activeApplication];
 //  CGRect frame = application.wdFrame;
 //  CGRect frame = [[UIScreen mainScreen] bounds];
+  UIInterfaceOrientation orientation = app.interfaceOrientation;
+  
   if ([self isSwipeFromTopRight]) {
-    [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    if (UIInterfaceOrientationIsLandscape(orientation)) {
+      CGFloat width = MAX(frame.size.width, frame.size.height);
+      CGFloat height = MIN(frame.size.width, frame.size.height);
+      [FBElementCommands drag:CGPointMake(width, 0) endPoint:CGPointMake(width, height/2) duration:.0001];
+    }
+    else {
+      [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    }
   }
   else {
     //before iPhone X
-    UIInterfaceOrientation orientation = app.interfaceOrientation;
     if (orientation == UIInterfaceOrientationPortrait) {
       [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
     }
@@ -418,6 +427,22 @@ static NSData *kLastImageData;
   }
   
   FBResponseJSONPayload *response = nil;
+  
+  if (restart) {
+    //stop if it is mirroring now
+    FBResponseJSONPayload *response = (FBResponseJSONPayload* _Nullable)[FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer useButtonTap:NO];
+    if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+      //try static text
+      response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:airplayServer useButtonTap:NO];
+    }
+    [NSThread sleepForTimeInterval:0.2];
+    response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:@"Stop Mirroring" useButtonTap:NO];
+    if ([[[response dictionary] objectForKey:@"status"] integerValue] != 0) {
+      //try static text
+      [NSThread sleepForTimeInterval:0.2];
+      response = [FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"StaticText" query:@"label" queryValue:@"Stop Mirroring" useButtonTap:NO];
+    }
+  }
   
   int i = 3;
   while (i >= 0) {
@@ -472,12 +497,19 @@ static NSData *kLastImageData;
   CGRect frame = app.frame;
   CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
   
+  UIInterfaceOrientation orientation = app.interfaceOrientation;
   if ([self isSwipeFromTopRight]) {
-    [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    if (UIInterfaceOrientationIsLandscape(orientation)) {
+      CGFloat width = MAX(frame.size.width, frame.size.height);
+      CGFloat height = MIN(frame.size.width, frame.size.height);
+      [FBElementCommands drag:CGPointMake(width, 0) endPoint:CGPointMake(width, height/2) duration:.0001];
+    }
+    else {
+      [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    }
   }
   else {
     //before iPhone X
-    UIInterfaceOrientation orientation = app.interfaceOrientation;
     if (orientation == UIInterfaceOrientationPortrait) {
       [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
     }
@@ -525,12 +557,19 @@ static NSData *kLastImageData;
   CGRect frame = app.frame;
   CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
   
+  UIInterfaceOrientation orientation = app.interfaceOrientation;
   if ([self isSwipeFromTopRight]) {
-    [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    if (UIInterfaceOrientationIsLandscape(orientation)) {
+      CGFloat width = MAX(frame.size.width, frame.size.height);
+      CGFloat height = MIN(frame.size.width, frame.size.height);
+      [FBElementCommands drag:CGPointMake(width, 0) endPoint:CGPointMake(width, height/2) duration:.0001];
+    }
+    else {
+      [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
+    }
   }
   else {
     //before iPhone X
-    UIInterfaceOrientation orientation = app.interfaceOrientation;
     if (orientation == UIInterfaceOrientationPortrait) {
       [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
     }

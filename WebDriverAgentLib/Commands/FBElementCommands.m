@@ -350,10 +350,15 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
   CGPoint startPoint = CGPointMake((CGFloat)[request.arguments[@"fromX"] doubleValue], (CGFloat)[request.arguments[@"fromY"] doubleValue]);
   CGPoint endPoint = CGPointMake((CGFloat)[request.arguments[@"toX"] doubleValue], (CGFloat)[request.arguments[@"toY"] doubleValue]);
   NSTimeInterval duration = [request.arguments[@"duration"] doubleValue];
-  XCUICoordinate *endCoordinate = [self.class gestureCoordinateWithCoordinate:endPoint application:session.activeApplication shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
-  XCUICoordinate *startCoordinate = [self.class gestureCoordinateWithCoordinate:startPoint application:session.activeApplication shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
-  [startCoordinate pressForDuration:duration thenDragToCoordinate:endCoordinate];
+  [self drag:startPoint endPoint:endPoint duration:duration];
   return FBResponseWithOK();
+}
+
++ (void)drag:(CGPoint)startPoint endPoint:(CGPoint)endPoint duration:(double)duration {
+  FBApplication *app = [FBApplication fb_activeApplication];
+  XCUICoordinate *endCoordinate = [self.class gestureCoordinateWithCoordinate:endPoint application:app shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
+  XCUICoordinate *startCoordinate = [self.class gestureCoordinateWithCoordinate:startPoint application:app shouldApplyOrientationWorkaround:isSDKVersionLessThan(@"11.0")];
+  [startCoordinate pressForDuration:duration thenDragToCoordinate:endCoordinate];
 }
 
 + (id<FBResponsePayload>)handleDragCoordinate2:(FBRouteRequest *)request
@@ -466,7 +471,18 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     NSString *subtitle = texts.count > 1 ? [texts[1] label] : @"";
     NSArray *buttons = [[alert buttons] allElementsBoundByIndex];
     for (XCUIElement *button in buttons) {
-      if (CGRectContainsPoint(button.frame, tapPoint)) {
+      BOOL contains = CGRectContainsPoint(button.frame, tapPoint);
+      if (contains == NO) {
+        // see if the device in landscape mode and translate the coordinates
+        CGRect buttonFrame = button.frame;
+        UIInterfaceOrientation orientation = FBApplication.fb_activeApplication.interfaceOrientation;
+        CGSize screenSize = FBAdjustDimensionsForApplication(application.windows.fb_firstMatch.frame.size, orientation);
+        CGPoint point = FBInvertPointForApplication(CGPointMake(buttonFrame.origin.x, buttonFrame.origin.y), screenSize, orientation);
+        CGSize size = FBAdjustDimensionsForApplication(buttonFrame.size, orientation);
+        buttonFrame = CGRectMake(point.x, point.y, size.width, size.height);
+        contains = CGRectContainsPoint(buttonFrame, tapPoint);
+      }
+      if (contains == YES) {
         NSString *label = [button label];
 //        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
         [button tap];
@@ -524,7 +540,18 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
     NSString *subtitle = texts.count > 1 ? [texts[1] label] : @"";
     NSArray *buttons = [[alert buttons] allElementsBoundByIndex];
     for (XCUIElement *button in buttons) {
-      if (CGRectContainsPoint(button.frame, tapPoint)) {
+      BOOL contains = CGRectContainsPoint(button.frame, tapPoint);
+      if (contains == NO) {
+        // see if the device in landscape mode and translate the coordinates
+        CGRect buttonFrame = button.frame;
+        UIInterfaceOrientation orientation = FBApplication.fb_activeApplication.interfaceOrientation;
+        CGSize screenSize = FBAdjustDimensionsForApplication(application.frame.size, orientation);
+        CGPoint point = FBInvertPointForApplication(CGPointMake(buttonFrame.origin.x, buttonFrame.origin.y), screenSize, orientation);
+        CGSize size = FBAdjustDimensionsForApplication(buttonFrame.size, orientation);
+        buttonFrame = CGRectMake(point.x, point.y, size.width, size.height);
+        contains = CGRectContainsPoint(buttonFrame, tapPoint);
+      }
+      if (contains == YES) {
         NSString *label = [button label];
 //        NSLog(@"### TIVO DEBUG 2: found alert button to tap: %@", label);
         [button tap];
@@ -574,9 +601,29 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
 {
   NSString *textToType = [request.arguments[@"value"] componentsJoinedByString:@""];
   NSUInteger frequency = [request.arguments[@"frequency"] unsignedIntegerValue] ?: [FBConfiguration maxTypingFrequency];
+  BOOL debug = [request.arguments[@"debug"] boolValue];
+
   NSError *error;
   if (![FBKeyboard typeText:textToType frequency:frequency error:&error]) {
+    [FBLogger logFmt:@"/keys failed to type %@ with error: %@", textToType, error];
     return FBResponseWithError(error);
+  }
+  if (debug) {
+    FBApplication *application = [FBApplication fb_activeApplication];
+    NSArray *textFields = [[application textFields] allElementsBoundByIndex];
+    NSArray *searchFields = [[application searchFields] allElementsBoundByIndex];
+    NSArray *secureTextFields = [[application secureTextFields] allElementsBoundByIndex];
+    NSArray *textViews = [[application textViews] allElementsBoundByIndex];
+    NSArray *fields = [[[textFields arrayByAddingObjectsFromArray:searchFields] arrayByAddingObjectsFromArray:secureTextFields] arrayByAddingObjectsFromArray:textViews];
+    if (fields.count > 0) {
+      for (XCUIElement *textField in fields) {
+        if (textField.hasKeyboardFocus) {
+          NSString *text = textField.value;
+          [FBLogger logFmt:@"/keys typed %@ and read %@", textToType, text];
+          break;
+        }
+      }
+    }
   }
   return FBResponseWithOK();
 }

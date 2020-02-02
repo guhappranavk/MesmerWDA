@@ -112,13 +112,13 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
     [FBLogger logFmt:@"Last attempt to start web server failed with error %@", [error description]];
     abort();
   }
-  [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
   
-  [FBLogger logFmt:@"Appium WDA Version: %@", @"12.11.2019.1"];//mm.dd.yyyy.x
+  [FBLogger logFmt:@"Appium WDA Version: %@", @"01.31.2020.1"];
   
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     NSString *usbIp = [XCUIDevice sharedDevice].fb_usbIPAddress;
     NSLog(@"IP address for MesmAir: %@", usbIp);
+    [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
   });
   [self startTimedTask];
   [[BSWDataModelHandler sharedInstance] loadModel:@"model" modelFileExtn:@"tflite" labels:@"labels" labelsFileExtn:@"txt"];

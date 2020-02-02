@@ -15,6 +15,7 @@
 
 @interface FBElementCommands : NSObject <FBCommandHandler>
 
++ (void)drag:(CGPoint)startPoint endPoint:(CGPoint)endPoint duration:(double)duration;
 + (void)drag2:(CGPoint)startPoint endPoint:(CGPoint)endPoint duration:(double)duration velocity:(double)velocity;
 + (id)find:(XCUIApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue;
 + (id<FBResponsePayload>)findAndTap:(XCUIApplication *)application type:(NSString *)type query:(NSString *)query queryValue:(NSString *)queryValue useButtonTap:(BOOL)useButtonTap;
