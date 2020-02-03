@@ -68,6 +68,14 @@ static BOOL FBShouldAnonymizeFullImagePaths = NO;
   return DefaultMjpegServerPort;
 }
 
++ (BOOL)useMesmair {
+  NSString *useMesmair = NSProcessInfo.processInfo.environment[@"USE_MESMAIR"];
+  if (useMesmair == nil) {
+    return NO;
+  }
+  return [useMesmair boolValue];
+}
+
 + (BOOL)verboseLoggingEnabled
 {
   return [NSProcessInfo.processInfo.environment[@"VERBOSE_LOGGING"] boolValue];

@@ -116,17 +116,24 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
   [FBLogger logFmt:@"Appium WDA Version: %@", @"02.03.2020.1"];
   
 #if !TARGET_OS_SIMULATOR
-  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    NSString *usbIp = [XCUIDevice sharedDevice].fb_usbIPAddress;
-    NSLog(@"IP address for MesmAir: %@", usbIp);
-    [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [self startTimedTask];
+  
+  if ([FBConfiguration useMesmair] == YES) {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      NSString *usbIp = [XCUIDevice sharedDevice].fb_usbIPAddress;
+      NSLog(@"IP address for MesmAir: %@", usbIp);
+      [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
+        [self startTimedTask];
+      });
     });
-  });
+  }
+  else {
+    [self startTimedTask];
+  }
 #else
   [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
-    [self startTimedTask];
+  [self startTimedTask];
 #endif
   
   [[BSWDataModelHandler sharedInstance] loadModel:@"model" modelFileExtn:@"tflite" labels:@"labels" labelsFileExtn:@"txt"];

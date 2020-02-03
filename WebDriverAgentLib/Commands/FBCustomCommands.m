@@ -75,6 +75,7 @@
     [[FBRoute POST:@"/orientationLock"].withoutSession respondWithTarget:self action:@selector(handleOrientationLock:)],
     [[FBRoute GET:@"/networkConditions"].withoutSession respondWithTarget:self action:@selector(handleNetworkConditions:)],
     [[FBRoute POST:@"/networkCondition"].withoutSession respondWithTarget:self action:@selector(handleNetworkCondition:)],
+//    [[FBRoute GET:@"/url/:url/networkThroughput"].withoutSession respondWithTarget:self action:@selector(handleNetworkThroughput:)],
   ];
 }
 
@@ -354,7 +355,15 @@ static NSData *kLastImageData;
   uname(&systemInfo);
 
   NSString *deviceName =  [NSString stringWithCString:systemInfo.machine encoding:NSUTF8StringEncoding];
-  if ([deviceName caseInsensitiveCompare:@"iPhone10,3"] == NSOrderedSame ||
+  if ([deviceName caseInsensitiveCompare:@"iPhone9,1"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone9,2"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone9,3"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone9,4"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone10,1"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone10,2"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone10,3"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone10,4"] == NSOrderedSame ||
+      [deviceName caseInsensitiveCompare:@"iPhone10,5"] == NSOrderedSame ||
       [deviceName caseInsensitiveCompare:@"iPhone10,6"] == NSOrderedSame ||
       [deviceName caseInsensitiveCompare:@"iPhone11,2"] == NSOrderedSame ||
       [deviceName caseInsensitiveCompare:@"iPhone11,4"] == NSOrderedSame ||
@@ -753,6 +762,19 @@ static NSData *kLastImageData;
   [self terminatePreferencesApp:preferencesApp andActivate:app];
   return FBResponseWithObject(@{@"enabled" : @(enabled), @"conditions" : ret});
 }
+
+//+ (id<FBResponsePayload>)handleNetworkThroughput:(FBRouteRequest *)request
+//{
+//  NSString *urlString = request.parameters[@"url"];
+//  NSURL *url = [NSURL URLWithString:urlString];
+//
+//  NSURLSessionConfiguration *backgroundConfigurationObject = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"backgroundSessionIdentifier"];
+//  NSURLSession *session = [NSURLSession sessionWithConfiguration:backgroundConfigurationObject delegate:self delegateQueue:[NSOperationQueue mainQueue]];
+//
+//  NSURLSessionDownloadTask *task = [session downloadTaskWithURL:url];
+//  [task resume];
+//  return FBResponseWithOK();
+//}
 
 + (id<FBResponsePayload>)handleNetworkCondition:(FBRouteRequest *)request
 {
