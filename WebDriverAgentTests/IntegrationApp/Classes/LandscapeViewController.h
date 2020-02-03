@@ -12,6 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface LandscapeViewController : UIViewController
 
+- (IBAction)dismissVC:(id)sender;
+
 @end
 
 NS_ASSUME_NONNULL_END

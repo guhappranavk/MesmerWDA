@@ -26,6 +26,7 @@
 		4762399623D1F2FA00271BBD /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4762399523D1F2FA00271BBD /* WebKit.framework */; };
 		4762399723D1F69000271BBD /* WebKitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4762399223D1F07A00271BBD /* WebKitViewController.m */; };
 		47FD22D123D9871800B9180F /* LandscapeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 47FD22D023D9871800B9180F /* LandscapeViewController.m */; };
+		47FD22D323D992F300B9180F /* AppIcon.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 47FD22D223D992F300B9180F /* AppIcon.xcassets */; };
 		710181F8211DF584002FD3A8 /* CocoaAsyncSocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 710181F7211DF584002FD3A8 /* CocoaAsyncSocket.framework */; };
 		71018201211DF62C002FD3A8 /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 71018200211DF62C002FD3A8 /* libxml2.tbd */; };
 		7101820D211E026B002FD3A8 /* libAccessibility.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 7101820C211E026B002FD3A8 /* libAccessibility.tbd */; };
@@ -507,6 +508,7 @@
 		4762399523D1F2FA00271BBD /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		47FD22CF23D9871800B9180F /* LandscapeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LandscapeViewController.h; sourceTree = "<group>"; };
 		47FD22D023D9871800B9180F /* LandscapeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LandscapeViewController.m; sourceTree = "<group>"; };
+		47FD22D223D992F300B9180F /* AppIcon.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = AppIcon.xcassets; sourceTree = "<group>"; };
 		710181F7211DF584002FD3A8 /* CocoaAsyncSocket.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CocoaAsyncSocket.framework; path = Carthage/Build/iOS/CocoaAsyncSocket.framework; sourceTree = "<group>"; };
 		71018200211DF62C002FD3A8 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
 		7101820C211E026B002FD3A8 /* libAccessibility.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libAccessibility.tbd; path = usr/lib/libAccessibility.tbd; sourceTree = SDKROOT; };
@@ -1399,6 +1401,7 @@
 		EE9B76881CF7997600275851 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				47FD22D223D992F300B9180F /* AppIcon.xcassets */,
 				EE9B768C1CF7997600275851 /* Main.storyboard */,
 			);
 			path = Resources;
@@ -1994,6 +1997,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				47FD22D323D992F300B9180F /* AppIcon.xcassets in Resources */,
 				EE9B76941CF7997600275851 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2655,7 +2659,7 @@
 				INFOPLIST_FILE = WebDriverAgentTests/IntegrationApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.mesmerhq.facebook.IntegrationTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mesmerhq.IntegrationTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "mesmer-dev";
 			};

@@ -329,7 +329,9 @@ static bool fb_isLocked;
       temp_addr = temp_addr->ifa_next;
       continue;
     }
+    NSString *add = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
     NSString *interfaceName = [NSString stringWithUTF8String:temp_addr->ifa_name];
+    NSLog(@"NAME  =======> %@ :::: ADDRESS =======> %@", interfaceName, add);
     if(![interfaceName containsString:@"en"] || [interfaceName containsString:@"en0"]) { //ignore wi-fi interface
       temp_addr = temp_addr->ifa_next;
       continue;

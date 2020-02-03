@@ -120,6 +120,7 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
     NSString *usbIp = [XCUIDevice sharedDevice].fb_usbIPAddress;
     NSLog(@"IP address for MesmAir: %@", usbIp);
   });
+  
   [self startTimedTask];
   [[BSWDataModelHandler sharedInstance] loadModel:@"model" modelFileExtn:@"tflite" labels:@"labels" labelsFileExtn:@"txt"];
 }

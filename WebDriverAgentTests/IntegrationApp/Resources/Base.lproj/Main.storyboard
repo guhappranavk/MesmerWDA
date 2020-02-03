@@ -74,7 +74,7 @@
                                 <rect key="frame" x="101" y="271" width="118" height="30"/>
                                 <state key="normal" title="Landscape Mode"/>
                                 <connections>
-                                    <segue destination="88z-nx-8Qc" kind="show" id="T8W-Ua-0k0"/>
+                                    <segue destination="88z-nx-8Qc" kind="presentation" id="o76-z2-bAg"/>
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="CURRENT ORIENTATION:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uiD-R4-b34">
@@ -117,7 +117,7 @@
         <!--Landscape View Controller-->
         <scene sceneID="c6s-ho-Eu7">
             <objects>
-                <viewController id="88z-nx-8Qc" customClass="LandscapeViewController" sceneMemberID="viewController">
+                <viewController modalPresentationStyle="fullScreen" id="88z-nx-8Qc" customClass="LandscapeViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="Rwb-IO-fsK"/>
                         <viewControllerLayoutGuide type="bottom" id="gI5-A0-J2q"/>
@@ -133,6 +133,14 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cbP-Hf-qJp">
+                                <rect key="frame" x="133" y="72" width="54" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Dismiss"/>
+                                <connections>
+                                    <action selector="dismissVC:" destination="88z-nx-8Qc" eventType="touchUpInside" id="UEj-Qy-PVT"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                     </view>

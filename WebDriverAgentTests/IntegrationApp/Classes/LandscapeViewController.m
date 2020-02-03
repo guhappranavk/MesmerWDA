@@ -17,15 +17,22 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-  [[UIDevice currentDevice] setValue:[NSNumber numberWithInt:UIDeviceOrientationLandscapeRight] forKey:@"orientation"]; 
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations{
     return UIInterfaceOrientationMaskLandscape;
 }
 
+- (UIInterfaceOrientation) preferredInterfaceOrientationForPresentation {
+  return UIInterfaceOrientationLandscapeRight;
+}
+
 - (BOOL)shouldAutorotate {
   return true;
+}
+
+- (IBAction)dismissVC:(id)sender {
+  [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 /*

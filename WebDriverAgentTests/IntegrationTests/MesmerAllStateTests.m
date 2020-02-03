@@ -18,15 +18,8 @@
 @implementation MesmerAllStateTests
 
 - (void)setUp {
-    // Put setup code here. This method is called before the invocation of each test method in the class.
-    
-    // In UI tests it is usually best to stop immediately when a failure occurs.
-    
-
-    // UI tests must launch the application that they test. Doing this in setup will make sure it happens for each test method.
-  self.allStateApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.mesmer.AllstateMobileApp"];
-  [self.allStateApp launch];
-    // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+//  self.allStateApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.mesmer.AllstateMobileApp"];
+//  [self.allStateApp launch];
 }
 
 - (void)tearDown {
@@ -64,7 +57,7 @@
 
 - (void)do_login {
   XCUIElement *userName = self.allStateApp.textFields[@"User ID"];
-  BOOL retrun_val = [userName waitForExistenceWithTimeout:15.0f];
+//  BOOL retrun_val = [userName waitForExistenceWithTimeout:15.0f];
   [userName tap];
   
   if ([userName value]) {
@@ -81,5 +74,56 @@
   [loginBtn tap];
 
 }
+
+- (void)test_ring_orientation {
+  XCUIApplication *ringApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.mesmer.ring"];
+  [ringApp launch];
+  
+  XCUIElement *loginBtn = ringApp.buttons[@"LOG IN"];
+  BOOL retrun_val = [loginBtn waitForExistenceWithTimeout:5.0f];
+  if (retrun_val) {
+    [loginBtn tap];
+    
+    XCUIElement *userName = ringApp.textFields[@"Email Address"];
+    retrun_val = [userName waitForExistenceWithTimeout:15.0f];
+    [userName tap];
+    
+    [userName typeText:@"ring@mesmerhq.com"];
+    
+    XCUIElement *password = ringApp.secureTextFields[@"Password"];
+    [password tap];
+    [password typeText:@"P@ss2020"];
+    
+    loginBtn = ringApp.buttons[@"LOG IN"];
+    [loginBtn tap];
+  }
+  
+  XCUIElement *homescreen_cell = ringApp.cells[@"dashboard.neighborhood.view"];
+  retrun_val = [homescreen_cell waitForExistenceWithTimeout:30.0f];
+  
+  if (retrun_val) {
+    XCUIElement *cell = ringApp.cells[@"Front Door cell"];
+    [cell tap];
+    
+    XCUIElement *fullScreen_btn = ringApp.buttons[@"player.button.fullscreen"];
+    [fullScreen_btn tap];
+    
+    XCUIElement *stream_btn = ringApp.buttons[@"button.start.stream"];
+    [stream_btn tap];
+
+    XCUIElement *endCall_btn = ringApp.buttons[@"button.end.call"];
+    retrun_val = [endCall_btn waitForExistenceWithTimeout:30.0f];
+    if (retrun_val)
+      [endCall_btn tap];
+
+    [fullScreen_btn tap];
+
+    [fullScreen_btn tap];
+    [fullScreen_btn tap];
+    [fullScreen_btn tap];
+    
+  }
+}
+
 
 @end

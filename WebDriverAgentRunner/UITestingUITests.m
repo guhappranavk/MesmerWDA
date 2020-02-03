@@ -8,12 +8,13 @@
  */
 
 #import <XCTest/XCTest.h>
-
+#import "XCUIDevice+FBHelpers.h"
 #import <WebDriverAgentLib/FBDebugLogDelegateDecorator.h>
 #import <WebDriverAgentLib/FBConfiguration.h>
 #import <WebDriverAgentLib/FBFailureProofTestCase.h>
 #import <WebDriverAgentLib/FBWebServer.h>
 #import <WebDriverAgentLib/XCTestCase.h>
+
 
 @interface UITestingUITests : FBFailureProofTestCase <FBWebServerDelegate>
 @end
@@ -31,7 +32,7 @@
  Never ending test used to start WebDriverAgent
  */
 - (void)testRunner
-{
+{  
   FBWebServer *webServer = [[FBWebServer alloc] init];
   webServer.delegate = self;
   [webServer startServing];
