@@ -15,6 +15,11 @@
 
 @implementation ViewController
 
+- (void)viewDidLoad {
+  [super viewDidLoad];
+  NSLog(@"%@", [self.view subviews]);
+}
+
 - (void)viewWillAppear:(BOOL)animated {
   [[UIDevice currentDevice] setValue:[NSNumber numberWithInt:UIDeviceOrientationPortrait] forKey:@"orientation"];
 }
