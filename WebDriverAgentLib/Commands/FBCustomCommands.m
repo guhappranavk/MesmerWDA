@@ -75,6 +75,7 @@
     [[FBRoute POST:@"/orientationLock"].withoutSession respondWithTarget:self action:@selector(handleOrientationLock:)],
     [[FBRoute GET:@"/networkConditions"].withoutSession respondWithTarget:self action:@selector(handleNetworkConditions:)],
     [[FBRoute POST:@"/networkCondition"].withoutSession respondWithTarget:self action:@selector(handleNetworkCondition:)],
+//    [[FBRoute GET:@"/url/:url/networkThroughput"].withoutSession respondWithTarget:self action:@selector(handleNetworkThroughput:)],
   ];
 }
 
@@ -399,7 +400,7 @@ static NSData *kLastImageData;
       return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
   }
   CGRect frame = app.frame;
-  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
+//  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, app.interfaceOrientation);
   
 //  FBApplication *application = [FBApplication fb_activeApplication];
 //  CGRect frame = application.wdFrame;
@@ -422,7 +423,7 @@ static NSData *kLastImageData;
       [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
     }
     else {
-      [FBElementCommands drag2:CGPointMake(0, screenSize.height/2) endPoint:CGPointMake(frame.size.width/2, frame.size.height) duration:0.001 velocity:1500];
+      [FBElementCommands drag2:CGPointMake(0, 0) endPoint:CGPointMake(frame.size.height, frame.size.height/4) duration:0.001 velocity:1500];
     }
   }
   
@@ -495,7 +496,7 @@ static NSData *kLastImageData;
   }
   
   CGRect frame = app.frame;
-  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
+//  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
   
   UIInterfaceOrientation orientation = app.interfaceOrientation;
   if ([self isSwipeFromTopRight]) {
@@ -514,7 +515,7 @@ static NSData *kLastImageData;
       [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
     }
     else {
-      [FBElementCommands drag2:CGPointMake(0, screenSize.height/2) endPoint:CGPointMake(frame.size.width/2, frame.size.height) duration:0.001 velocity:1500];
+      [FBElementCommands drag2:CGPointMake(0, 0) endPoint:CGPointMake(frame.size.height, frame.size.height/4) duration:0.001 velocity:1500];
     }
   }
   FBResponseJSONPayload *response = (FBResponseJSONPayload* _Nullable)[FBElementCommands findAndTap:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer useButtonTap:NO];
@@ -555,7 +556,7 @@ static NSData *kLastImageData;
   }
   
   CGRect frame = app.frame;
-  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
+//  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
   
   UIInterfaceOrientation orientation = app.interfaceOrientation;
   if ([self isSwipeFromTopRight]) {
@@ -574,7 +575,7 @@ static NSData *kLastImageData;
       [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
     }
     else {
-      [FBElementCommands drag2:CGPointMake(0, screenSize.height/2) endPoint:CGPointMake(frame.size.width/2, frame.size.height) duration:0.001 velocity:1500];
+      [FBElementCommands drag2:CGPointMake(0, 0) endPoint:CGPointMake(frame.size.height, frame.size.height/4) duration:0.001 velocity:1500];
     }
   }
   BOOL mirroring = [FBElementCommands find:[FBApplication fb_activeApplication] type:@"Button" query:@"label" queryValue:airplayServer] != nil;
@@ -675,7 +676,7 @@ static NSData *kLastImageData;
   }
   
   CGRect frame = app.frame;
-  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
+//  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
   
   if ([self isSwipeFromTopRight]) {
     [FBElementCommands drag2:CGPointMake(frame.size.width, 0) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
@@ -687,7 +688,7 @@ static NSData *kLastImageData;
       [FBElementCommands drag2:CGPointMake(frame.size.width/2, frame.size.height) endPoint:CGPointMake(frame.size.width/2, frame.size.height/4) duration:0.001 velocity:1500];
     }
     else {
-      [FBElementCommands drag2:CGPointMake(0, screenSize.height/2) endPoint:CGPointMake(frame.size.width/2, frame.size.height) duration:0.001 velocity:1500];
+      [FBElementCommands drag2:CGPointMake(0, 0) endPoint:CGPointMake(frame.size.height, frame.size.height/4) duration:0.001 velocity:1500];
     }
   }
   
@@ -753,6 +754,19 @@ static NSData *kLastImageData;
   [self terminatePreferencesApp:preferencesApp andActivate:app];
   return FBResponseWithObject(@{@"enabled" : @(enabled), @"conditions" : ret});
 }
+
+//+ (id<FBResponsePayload>)handleNetworkThroughput:(FBRouteRequest *)request
+//{
+//  NSString *urlString = request.parameters[@"url"];
+//  NSURL *url = [NSURL URLWithString:urlString];
+//
+//  NSURLSessionConfiguration *backgroundConfigurationObject = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"backgroundSessionIdentifier"];
+//  NSURLSession *session = [NSURLSession sessionWithConfiguration:backgroundConfigurationObject delegate:self delegateQueue:[NSOperationQueue mainQueue]];
+//
+//  NSURLSessionDownloadTask *task = [session downloadTaskWithURL:url];
+//  [task resume];
+//  return FBResponseWithOK();
+//}
 
 + (id<FBResponsePayload>)handleNetworkCondition:(FBRouteRequest *)request
 {

@@ -13,7 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface FBCustomCommands : NSObject <FBCommandHandler>
+@interface FBCustomCommands : NSObject <FBCommandHandler/*, NSURLSessionDownloadDelegate*/>
 
 @end
 
