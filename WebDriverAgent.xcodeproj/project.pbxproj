@@ -26,6 +26,7 @@
 		4762399623D1F2FA00271BBD /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4762399523D1F2FA00271BBD /* WebKit.framework */; };
 		4762399723D1F69000271BBD /* WebKitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4762399223D1F07A00271BBD /* WebKitViewController.m */; };
 		47DA6E1723E984D500461E5A /* TableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 47DA6E1623E984D500461E5A /* TableViewController.m */; };
+		47DA6E1A23EAC07E00461E5A /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 47DA6E1923EAC07E00461E5A /* HomeViewController.m */; };
 		47FD22D123D9871800B9180F /* LandscapeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 47FD22D023D9871800B9180F /* LandscapeViewController.m */; };
 		47FD22D323D992F300B9180F /* AppIcon.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 47FD22D223D992F300B9180F /* AppIcon.xcassets */; };
 		710181F8211DF584002FD3A8 /* CocoaAsyncSocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 710181F7211DF584002FD3A8 /* CocoaAsyncSocket.framework */; };
@@ -509,6 +510,8 @@
 		4762399523D1F2FA00271BBD /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		47DA6E1523E984D500461E5A /* TableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TableViewController.h; sourceTree = "<group>"; };
 		47DA6E1623E984D500461E5A /* TableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TableViewController.m; sourceTree = "<group>"; };
+		47DA6E1823EAC07E00461E5A /* HomeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HomeViewController.h; sourceTree = "<group>"; };
+		47DA6E1923EAC07E00461E5A /* HomeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HomeViewController.m; sourceTree = "<group>"; };
 		47FD22CF23D9871800B9180F /* LandscapeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LandscapeViewController.h; sourceTree = "<group>"; };
 		47FD22D023D9871800B9180F /* LandscapeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LandscapeViewController.m; sourceTree = "<group>"; };
 		47FD22D223D992F300B9180F /* AppIcon.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = AppIcon.xcassets; sourceTree = "<group>"; };
@@ -1399,6 +1402,8 @@
 				47FD22D023D9871800B9180F /* LandscapeViewController.m */,
 				47DA6E1523E984D500461E5A /* TableViewController.h */,
 				47DA6E1623E984D500461E5A /* TableViewController.m */,
+				47DA6E1823EAC07E00461E5A /* HomeViewController.h */,
+				47DA6E1923EAC07E00461E5A /* HomeViewController.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -2180,6 +2185,7 @@
 				47DA6E1723E984D500461E5A /* TableViewController.m in Sources */,
 				EE9B76911CF7997600275851 /* main.m in Sources */,
 				47FD22D123D9871800B9180F /* LandscapeViewController.m in Sources */,
+				47DA6E1A23EAC07E00461E5A /* HomeViewController.m in Sources */,
 				EE9B768F1CF7997600275851 /* ViewController.m in Sources */,
 				ADDA07241D6BB2BF001700AC /* FBScrollViewController.m in Sources */,
 				EE8BA97A1DCCED9A00A9DEF8 /* FBNavigationController.m in Sources */,

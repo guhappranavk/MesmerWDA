@@ -171,10 +171,10 @@
             </objects>
             <point key="canvasLocation" x="-653" y="1420"/>
         </scene>
-        <!--View Controller-->
+        <!--Home View Controller-->
         <scene sceneID="O5Q-0c-Hlh">
             <objects>
-                <viewController id="SkF-pb-ON2" sceneMemberID="viewController">
+                <viewController id="SkF-pb-ON2" customClass="HomeViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="fkc-9g-NLi">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -195,9 +195,10 @@
                                     <segue destination="3ur-D9-8FT" kind="show" id="gvr-b8-3wg"/>
                                 </connections>
                             </button>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" alpha="0.20000000000000001" contentMode="scaleToFill" keyboardDismissMode="interactive" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="z3N-ZY-kX7">
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" keyboardDismissMode="onDrag" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="z3N-ZY-kX7">
                                 <rect key="frame" x="28.5" y="170" width="263" height="157"/>
                                 <color key="backgroundColor" systemColor="opaqueSeparatorColor" red="0.77647058820000003" green="0.77647058820000003" blue="0.7843137255" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <accessibility key="accessibilityConfiguration" identifier="InputView" label="InputView"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="263" id="PRx-cG-EbX"/>
                                     <constraint firstAttribute="height" constant="157" id="tb2-RJ-OmK"/>
@@ -228,6 +229,9 @@
                         <viewLayoutGuide key="safeArea" id="H8F-94-jwN"/>
                     </view>
                     <navigationItem key="navigationItem" id="R6b-jM-kKM"/>
+                    <connections>
+                        <outlet property="inputView" destination="z3N-ZY-kX7" id="sgd-2q-pWt"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="L2K-UF-glI" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
