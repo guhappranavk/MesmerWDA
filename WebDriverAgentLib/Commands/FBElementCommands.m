@@ -80,6 +80,7 @@
     [[FBRoute POST:@"/wda/tap/:uuid"] respondWithTarget:self action:@selector(handleTap:)],
     [[FBRoute POST:@"/wda/tap"] respondWithTarget:self action:@selector(handleTapCoordinate:)],
     [[FBRoute POST:@"/wda/findAndTap"] respondWithTarget:self action:@selector(handleFindAndTap:)],
+    [[FBRoute POST:@"/wda/findAndTap2"] respondWithTarget:self action:@selector(handleFindAndTap2:)],
     [[FBRoute POST:@"/wda/touchAndHold"] respondWithTarget:self action:@selector(handleTouchAndHoldCoordinate:)],
     [[FBRoute POST:@"/wda/doubleTap"] respondWithTarget:self action:@selector(handleDoubleTapCoordinate:)],
     [[FBRoute POST:@"/wda/keys"] respondWithTarget:self action:@selector(handleKeys:)],
@@ -779,6 +780,42 @@ static const CGFloat DEFAULT_OFFSET = (CGFloat)0.2;
   }
   
   return [self findAndTap:application type:type query:query queryValue:queryValue useButtonTap:NO];
+}
+
+
++ (id<FBResponsePayload>)handleFindAndTap2:(FBRouteRequest *)request {
+  NSString *type = request.arguments[@"type"];
+  NSString *query = request.arguments[@"query"];
+  NSString *queryValue = request.arguments[@"queryValue"];
+  FBApplication *application = [FBApplication fb_activeApplication];
+  
+  NSArray *alerts = [[application alerts] allElementsBoundByIndex];
+  if (alerts.count > 0 && queryValue != nil) {
+    XCUIElement *alert = alerts[0];
+    NSArray *buttons = [[alert buttons] allElementsBoundByIndex];
+    for (XCUIElement *button in buttons) {
+      if ([button.label caseInsensitiveCompare:queryValue] == NSOrderedSame) {
+        [button tap];
+        return FBResponseWithStatus(FBCommandStatusNoError, @{@"tapTime" : @([[NSDate date] timeIntervalSince1970])});
+      }
+    }
+  }
+  
+  XCUIElementType elementType = [self elementTypeFromName:type];
+  if (elementType == (XCUIElementType)-1) {
+    return FBResponseWithErrorFormat(@"Type %@ is invalid", type);
+  }
+  
+  NSString *matchString = [NSString stringWithFormat: @"%@", queryValue];
+  NSString *predicateString = [NSString stringWithFormat:@"%@ %%@", query];
+  
+  NSPredicate *predicate = [NSPredicate predicateWithFormat: predicateString, matchString];
+  XCUIElement *element = [[application descendantsMatchingType:elementType] elementMatchingPredicate:predicate];
+  if ([element exists]) {
+      [element tap];
+      return FBResponseWithStatus(FBCommandStatusNoError, @{@"tapTime" : @([[NSDate date] timeIntervalSince1970])});
+  }
+  return FBResponseWithErrorFormat(@"%@ not found or not enabled", queryValue);
 }
 
 + (XCUIElementType)elementTypeFromName:(NSString *)name {
