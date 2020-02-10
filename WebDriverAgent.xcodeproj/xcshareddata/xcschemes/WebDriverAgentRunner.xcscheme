@@ -81,6 +81,11 @@
             value = "$(WDA_PRODUCT_BUNDLE_IDENTIFIER)"
             isEnabled = "YES">
          </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "USE_MESMAIR"
+            value = "$(USE_MESMAIR)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
       </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction

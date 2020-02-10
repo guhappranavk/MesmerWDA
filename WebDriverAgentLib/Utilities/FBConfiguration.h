@@ -60,6 +60,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (NSInteger)mjpegServerPort;
 
++ (BOOL)useMesmair;
+
 /**
  YES if verbose logging is enabled. NO otherwise.
  */
