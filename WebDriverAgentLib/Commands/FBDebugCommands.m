@@ -27,6 +27,7 @@
     [[FBRoute GET:@"/sourceAppium"] respondWithTarget:self action:@selector(handleGetSourceCommandAppium:)],
     [[FBRoute GET:@"/sourceAppium"].withoutSession respondWithTarget:self action:@selector(handleGetSourceCommandAppium:)],
     [[FBRoute GET:@"/source"] respondWithTarget:self action:@selector(handleGetSourceCommand:)],
+    [[FBRoute GET:@"/status/:status/source"].withoutSession respondWithTarget:self action:@selector(handleGetSourceCommand:)],
     [[FBRoute GET:@"/source"].withoutSession respondWithTarget:self action:@selector(handleGetSourceCommand:)],
     [[FBRoute GET:@"/attr/:attributes/source"].withoutSession respondWithTarget:self action:@selector(handleGetSourceCommand:)],
     [[FBRoute GET:@"/attr/:attributes/format/:sourceType/source"].withoutSession respondWithTarget:self action:@selector(handleGetSourceCommand:)],
@@ -69,13 +70,13 @@ static NSString *const SOURCE_FORMAT_DESCRIPTION = @"description";
 + (id<FBResponsePayload>)handleGetSourceCommand:(FBRouteRequest *)request
 {
   FBApplication *application = request.session.activeApplication ?: [FBApplication fb_activeApplication];
-  
 //  if ([application.bundleID caseInsensitiveCompare:@"com.apple.mobilesafari"] == NSOrderedSame) {
 //    CGRect frame = application.fb_lastSnapshot.frame;
 //    NSString *ret = [NSString stringWithFormat:@"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<XCUIElementTypeApplication type=\"XCUIElementTypeApplication\" class=\"UIApplication\" name=\"Safari\" label=\"Safari\" enabled=\"true\" hasFocus=\"false\" x=\"0\" y=\"0\" width=\"%.0f\" height=\"%.0f\">\n</XCUIElementTypeApplication>", frame.size.width, frame.size.height];
 //    return FBResponseWithObject(ret);
 //  }
   
+  BOOL withStatus = [request.parameters[@"status"] boolValue];
   NSString *attributes = request.parameters[@"attributes"];
   if (attributes != nil) {
     attributes = [attributes stringByReplacingOccurrencesOfString:@":" withString:@" @"];
@@ -86,12 +87,12 @@ static NSString *const SOURCE_FORMAT_DESCRIPTION = @"description";
   if (maxCells != nil) {
     maxCellsToReturn = [maxCells integerValue];
   }
-
+  
   NSString *sourceType = request.parameters[@"format"] ?: SOURCE_FORMAT_XML;
   id result;
   if ([sourceType caseInsensitiveCompare:SOURCE_FORMAT_XML] == NSOrderedSame) {
     [application fb_waitUntilSnapshotIsStable];
-    result = [FBXPath xmlStringWithSnapshot:application.fb_lastSnapshot query:attributes maxCells:maxCellsToReturn];
+    result = [FBXPath xmlStringWithSnapshot:application.fb_lastSnapshot query:attributes maxCells:maxCellsToReturn withStatusbar:withStatus];
   } else if ([sourceType caseInsensitiveCompare:SOURCE_FORMAT_JSON] == NSOrderedSame) {
     result = application.fb_tree;
   } else if ([sourceType caseInsensitiveCompare:SOURCE_FORMAT_DESCRIPTION] == NSOrderedSame) {

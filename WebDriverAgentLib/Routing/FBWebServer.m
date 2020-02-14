@@ -113,7 +113,7 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
     abort();
   }
   
-  [FBLogger logFmt:@"Appium WDA Version: %@", @"02.03.2020.4"];
+  [FBLogger logFmt:@"Appium WDA Version: %@", @"02.14.2020.1"];
   
 #if !TARGET_OS_SIMULATOR
   

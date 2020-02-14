@@ -60,11 +60,11 @@ extern NSString *const FBXPathQueryEvaluationException;
 + (nullable NSString *)xmlStringWithRootElement:(id<FBElement>)root;
 
 
-+ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query;
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query withStatusbar:(BOOL)withStatusbar;
 
-+ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query maxCells:(NSInteger)maxCells;
-+ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point;
-+ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point maxCells:(NSInteger)maxCells;
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query maxCells:(NSInteger)maxCells withStatusbar:(BOOL)withStatusbar;
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point withStatusbar:(BOOL)withStatusbar;
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point maxCells:(NSInteger)maxCells withStatusbar:(BOOL)withStatusbar;
 
 /**
  Returns an array of descendants matching given xpath query

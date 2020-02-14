@@ -16,7 +16,7 @@
 #import "XCUIElement+FBUtilities.h"
 #import "XCUIElement+FBWebDriverAttributes.h"
 #import "FBElementAttributeTransformer.h"
-
+#import "FBSpringboardApplication.h"
 
 @interface FBElementAttribute : NSObject
 
@@ -108,25 +108,25 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
   return nil;
 }
 
-+ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query withStatusbar:(BOOL)withStatusbar
 {
   return [self xmlStringWithSnapshot:root query:query point:CGPointZero];
 }
 
-+ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query maxCells:(NSInteger)maxCells
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query maxCells:(NSInteger)maxCells withStatusbar:(BOOL)withStatusbar
 {
-  return [self xmlStringWithSnapshot:root query:query point:CGPointZero maxCells:maxCells];
+  return [self xmlStringWithSnapshot:root query:query point:CGPointZero maxCells:maxCells withStatusbar:withStatusbar];
 }
 
 + (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point {
-  return [self xmlStringWithSnapshot:root query:query point:CGPointZero maxCells:-1];
+  return [self xmlStringWithSnapshot:root query:query point:CGPointZero maxCells:-1 withStatusbar:NO];
 }
 
-+ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point maxCells:(NSInteger)maxCells
++ (nullable NSString *)xmlStringWithSnapshot:(XCElementSnapshot *)root query:(nullable NSString *)query point:(CGPoint)point maxCells:(NSInteger)maxCells withStatusbar:(BOOL)withStatusbar
 {
   xmlDocPtr doc;
   xmlTextWriterPtr writer = xmlNewTextWriterDoc(&doc, 0);
-  int rc = [FBXPath getSnapshotAsXML:(XCElementSnapshot *)root writer:writer elementStore:nil query:query point:point maxCells:maxCells];
+  int rc = [FBXPath getSnapshotAsXML:(XCElementSnapshot *)root writer:writer elementStore:nil query:query point:point maxCells:maxCells withStatusbar:withStatusbar];
   if (rc < 0) {
     xmlFreeTextWriter(writer);
     xmlFreeDoc(doc);
@@ -179,10 +179,10 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
 }
 
 + (int)getSnapshotAsXML:(XCElementSnapshot *)root writer:(xmlTextWriterPtr)writer elementStore:(nullable NSMutableDictionary *)elementStore query:(nullable NSString*)query {
-  return [self getSnapshotAsXML:root writer:writer elementStore:elementStore query:query point:CGPointZero maxCells:-1];
+  return [self getSnapshotAsXML:root writer:writer elementStore:elementStore query:query point:CGPointZero maxCells:-1 withStatusbar:NO];
 }
 
-+ (int)getSnapshotAsXML:(XCElementSnapshot *)root writer:(xmlTextWriterPtr)writer elementStore:(nullable NSMutableDictionary *)elementStore query:(nullable NSString*)query point:(CGPoint)point maxCells:(NSInteger)maxCells
++ (int)getSnapshotAsXML:(XCElementSnapshot *)root writer:(xmlTextWriterPtr)writer elementStore:(nullable NSMutableDictionary *)elementStore query:(nullable NSString*)query point:(CGPoint)point maxCells:(NSInteger)maxCells withStatusbar:(BOOL)withStatusbar
 {
   int rc = xmlTextWriterStartDocument(writer, NULL, _UTF8Encoding, NULL);
   if (rc < 0) {
@@ -191,7 +191,7 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
   }
   // Trying to be smart here and only including attributes, that were asked in the query, to the resulting document.
   // This may speed up the lookup significantly in some cases
-  rc = [FBXPath generateXMLPresentation:root indexPath:(elementStore != nil ? topNodeIndexPath : nil) elementStore:elementStore includedAttributes:(query == nil ? nil : [self.class elementAttributesWithXPathQuery:query]) writer:writer point:point maxCells:maxCells];
+  rc = [FBXPath generateXMLPresentation:root indexPath:(elementStore != nil ? topNodeIndexPath : nil) elementStore:elementStore includedAttributes:(query == nil ? nil : [self.class elementAttributesWithXPathQuery:query]) writer:writer point:point maxCells:maxCells withSattusbar:withStatusbar];
   if (rc < 0) {
     [FBLogger log:@"Failed to generate XML presentation of a screen element"];
     return rc;
@@ -209,10 +209,10 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
 }
 
 + (int)generateXMLPresentation:(XCElementSnapshot *)root indexPath:(nullable NSString *)indexPath elementStore:(nullable NSMutableDictionary *)elementStore includedAttributes:(nullable NSSet<Class> *)includedAttributes writer:(xmlTextWriterPtr)writer {
-  return [self generateXMLPresentation:root indexPath:indexPath elementStore:elementStore includedAttributes:includedAttributes writer:writer point:CGPointZero maxCells:-1];
+  return [self generateXMLPresentation:root indexPath:indexPath elementStore:elementStore includedAttributes:includedAttributes writer:writer point:CGPointZero maxCells:-1 withSattusbar:NO];
 }
 
-+ (int)generateXMLPresentation:(XCElementSnapshot *)root indexPath:(nullable NSString *)indexPath elementStore:(nullable NSMutableDictionary *)elementStore includedAttributes:(nullable NSSet<Class> *)includedAttributes writer:(xmlTextWriterPtr)writer point:(CGPoint)point maxCells:(NSInteger)maxCells
++ (int)generateXMLPresentation:(XCElementSnapshot *)root indexPath:(nullable NSString *)indexPath elementStore:(nullable NSMutableDictionary *)elementStore includedAttributes:(nullable NSSet<Class> *)includedAttributes writer:(xmlTextWriterPtr)writer point:(CGPoint)point maxCells:(NSInteger)maxCells withSattusbar:(BOOL)withStatusbar
 {
   NSAssert((indexPath == nil && elementStore == nil) || (indexPath != nil && elementStore != nil), @"Either both or none of indexPath and elementStore arguments should be equal to nil", nil);
   
@@ -237,7 +237,15 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
   CGFloat rootHeigh = [[root.wdRect objectForKey:@"height"] floatValue];
   CGFloat rootMaxY = rootMinY + rootHeigh - 1;
   
-  NSArray *children = root.children;
+  NSMutableArray *children = [root.children mutableCopy];
+  
+  if (withStatusbar) {
+    FBSpringboardApplication *springBoard = FBSpringboardApplication.fb_springboard;
+    NSArray<XCUIElement *> *statusbars = [springBoard.statusBars allElementsBoundByIndex];
+    XCElementSnapshot *statusbarSnapshot = statusbars[statusbars.count - 1].fb_snapshotWithAttributes;
+    [children insertObject:statusbarSnapshot atIndex:0];
+  }
+  
   NSInteger visible = 0;
   for (NSUInteger i = 0; i < [children count]; i++) {
     XCElementSnapshot *childSnapshot = children[i];
@@ -271,7 +279,7 @@ NSString *const FBXPathQueryEvaluationException = @"FBXPathQueryEvaluationExcept
       }
     }
     
-    rc = [self generateXMLPresentation:childSnapshot indexPath:newIndexPath elementStore:elementStore includedAttributes:includedAttributes writer:writer point:point maxCells:maxCells];
+    rc = [self generateXMLPresentation:childSnapshot indexPath:newIndexPath elementStore:elementStore includedAttributes:includedAttributes writer:writer point:point maxCells:maxCells withSattusbar:NO];
     if (rc < 0) {
       return rc;
     }
