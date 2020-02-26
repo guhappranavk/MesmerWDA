@@ -76,6 +76,8 @@
     [[FBRoute GET:@"/networkConditions"].withoutSession respondWithTarget:self action:@selector(handleNetworkConditions:)],
     [[FBRoute POST:@"/networkCondition"].withoutSession respondWithTarget:self action:@selector(handleNetworkCondition:)],
 //    [[FBRoute GET:@"/url/:url/networkThroughput"].withoutSession respondWithTarget:self action:@selector(handleNetworkThroughput:)],
+    [[FBRoute POST:@"/darkMode"].withoutSession respondWithTarget:self action:@selector(handleDarkMode:)],
+
   ];
 }
 
@@ -623,6 +625,42 @@ static NSData *kLastImageData;
 {
   BOOL on = [request.arguments[@"set"] boolValue];
   return [self setPreference:@"Cellular" innerPreference:@"Cellular Data" on:on];
+}
+
++ (id<FBResponsePayload>)handleDarkMode:(FBRouteRequest *)request
+{
+  BOOL on = [request.arguments[@"set"] boolValue];
+  XCUIApplication *app = [FBApplication fb_activeApplication];
+  
+  NSArray *alerts = [[app alerts] allElementsBoundByIndex];
+  if (alerts.count > 0) {
+    return FBResponseWithStatus(FBCommandStatusUnexpectedAlertPresent, [FBElementUtils alertSource:alerts[0] withInfo:@"A modal dialog was open, blocking this operation"]);
+  }
+  
+  XCUIApplication *preferencesApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.Preferences"];
+  [preferencesApp launch];
+  
+  XCUIElement *cellElem = [FBElementCommands find:preferencesApp type:@"Cell" query:@"label" queryValue:@"Display & Brightness"];
+  if (cellElem == nil || [cellElem isEnabled] == NO) {
+    [self terminatePreferencesApp:preferencesApp andActivate:app];
+    return FBResponseWithStatus(FBCommandStatusUnhandled, [NSString stringWithFormat:@"Couldn't set preference: %@", @"Display & Brightness"]);
+  }
+  
+  [cellElem tap];
+  
+  XCUIElement *button = nil;
+  while (button == nil) {
+    [NSThread sleepForTimeInterval:0.5];
+    button = [FBElementCommands find:preferencesApp type:@"Button" query:@"label" queryValue:on ? @"Dark" : @"Light"];
+  }
+  
+  if (button) {
+    [button tap];
+  }
+  
+  [self terminatePreferencesApp:preferencesApp andActivate:app];
+  
+  return FBResponseWithOK();
 }
 
 + (id<FBResponsePayload>)setPreference:(NSString *)preference innerPreference:(NSString *)innerPreference on:(BOOL)on
