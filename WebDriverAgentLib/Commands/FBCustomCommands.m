@@ -46,6 +46,7 @@
     [[FBRoute GET:@"/bundleid/:bundleId/appState"].withoutSession respondWithTarget:self action:@selector(handleAppState:)],
     [[FBRoute POST:@"/wda/homescreen"].withoutSession respondWithTarget:self action:@selector(handleHomescreenCommand:)],
     [[FBRoute POST:@"/wda/deactivateApp"] respondWithTarget:self action:@selector(handleDeactivateAppCommand:)],
+    [[FBRoute POST:@"/wda/killApp"].withoutSession respondWithTarget:self action:@selector(handleKillAppCommand:)],
     [[FBRoute POST:@"/wda/keyboard/dismiss"] respondWithTarget:self action:@selector(handleDismissKeyboardCommand:)],
     [[FBRoute POST:@"/wda/lock"].withoutSession respondWithTarget:self action:@selector(handleLock:)],
     [[FBRoute POST:@"/wda/lock"] respondWithTarget:self action:@selector(handleLock:)],
@@ -77,7 +78,6 @@
     [[FBRoute POST:@"/networkCondition"].withoutSession respondWithTarget:self action:@selector(handleNetworkCondition:)],
 //    [[FBRoute GET:@"/url/:url/networkThroughput"].withoutSession respondWithTarget:self action:@selector(handleNetworkThroughput:)],
     [[FBRoute POST:@"/darkMode"].withoutSession respondWithTarget:self action:@selector(handleDarkMode:)],
-
   ];
 }
 
@@ -101,6 +101,14 @@
   if (![request.session.activeApplication fb_deactivateWithDuration:duration error:&error]) {
     return FBResponseWithError(error);
   }
+  return FBResponseWithOK();
+}
+
++ (id<FBResponsePayload>)handleKillAppCommand:(FBRouteRequest *)request
+{
+  NSString *bundleId = request.arguments[@"bundleId"];
+  XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier:bundleId];
+  [app terminate];
   return FBResponseWithOK();
 }
 
