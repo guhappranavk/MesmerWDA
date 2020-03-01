@@ -253,20 +253,39 @@
       [self tapButton:@"Reset" element:@"Reset Warnings" app:app];
     }
     else {
-      [self tap:@"Reset Warnings" app:app];
+      if (![self tap:@"Reset Warnings" app:app]) {
+        [self tap:@"Reset Settings" app:app];
+      }
     }
   }
   else {
     [self tap:@"General" app:app];
-    [self tap:@"Reset" app:app];
-    [self tap:@"Reset Location & Privacy" app:app];
-    if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
-      [self tapButton:@"Reset" element:@"Reset Warnings" app:app];
+    if (UIInterfaceOrientationIsLandscape(app.interfaceOrientation)) {
+      CGFloat width = MAX(app.frame.size.width, app.frame.size.height);
+      CGFloat height = MIN(app.frame.size.width, app.frame.size.height);
+      [FBElementCommands drag:CGPointMake(width/2, height - 10) endPoint:CGPointMake(width/2, height/2) duration:.0001];
     }
     else {
-      [self tap:@"Reset Warnings" app:app];
+      [FBElementCommands drag2:CGPointMake(app.frame.size.width/2, app.frame.size.height - 10) endPoint:CGPointMake(app.frame.size.width/2, app.frame.size.height/2) duration:0.001 velocity:1500];
+    }
+    [self tap:@"Reset" app:app];
+    [self tap:@"Reset Location & Privacy" app:app];
+
+    if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
+      if (![self tapButton:@"Reset" element:@"Reset Warnings" app:app]) {
+        [self tapButton:@"Reset" element:@"Reset Settings" app:app];
+      }
+    }
+    else {
+      [NSThread sleepForTimeInterval:0.2];
+      if (![self tap:@"Reset Warnings" app:app]) {
+        [self tap:@"Reset Settings" app:app];
+      }
+
     }
   }
+  [NSThread sleepForTimeInterval:0.2];
+  [app terminate];
   return FBResponseWithOK();
 }
 
