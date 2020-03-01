@@ -138,12 +138,12 @@ static BOOL FBShouldAnonymizeFullImagePaths = NO;
 
 + (BOOL)shouldWaitForQuiescence
 {
-  return FBShouldWaitForQuiescence;
+  return NO; //FBShouldWaitForQuiescence;
 }
 
 + (void)setShouldWaitForQuiescence:(BOOL)value
 {
-  FBShouldWaitForQuiescence = value;
+  FBShouldWaitForQuiescence = NO; //value;
 }
 
 + (BOOL)shouldAnonymizeFullImagePaths
