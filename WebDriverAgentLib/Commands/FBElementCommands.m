@@ -53,6 +53,7 @@
   return
   @[
     [[FBRoute GET:@"/window/size"] respondWithTarget:self action:@selector(handleGetWindowSize:)],
+    [[FBRoute GET:@"/size"].withoutSession respondWithTarget:self action:@selector(handleGetWindowSize2:)],
     [[FBRoute GET:@"/element/:uuid/enabled"] respondWithTarget:self action:@selector(handleGetEnabled:)],
     [[FBRoute GET:@"/element/:uuid/rect"] respondWithTarget:self action:@selector(handleGetRect:)],
     [[FBRoute GET:@"/element/:uuid/attribute/:name"] respondWithTarget:self action:@selector(handleGetAttribute:)],
@@ -632,6 +633,17 @@ static NSString *const PREFERRED_TYPE_STRATEGY_FB_WDA = @"fbwda";
 {
   CGRect frame = request.session.activeApplication.wdFrame;
   CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, request.session.activeApplication.interfaceOrientation);
+  return FBResponseWithStatus(FBCommandStatusNoError, @{
+    @"width": @(screenSize.width),
+    @"height": @(screenSize.height),
+  });
+}
+
++ (id<FBResponsePayload>)handleGetWindowSize2:(FBRouteRequest *)request
+{
+  XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.springboard"];
+  CGRect frame = app.wdFrame;
+  CGSize screenSize = FBAdjustDimensionsForApplication(frame.size, app.interfaceOrientation);
   return FBResponseWithStatus(FBCommandStatusNoError, @{
     @"width": @(screenSize.width),
     @"height": @(screenSize.height),
