@@ -248,6 +248,7 @@
   XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.Preferences"];
   [app launch];
   BOOL warnings = NO;
+  NSInteger reset = 0;
   if ([self tap:@"Reset Location & Privacy" app:app]) {
     if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
       [self tapButton:@"Reset" element:@"Reset Warnings" app:app];
@@ -259,7 +260,6 @@
     }
   }
   else {
-    NSInteger reset = 0;
     while (reset < 5) {
       NSLog(@"Tapping General");
       if ([self tap:@"General" app:app]) {
@@ -327,8 +327,10 @@
   NSString *elementName = warnings ? @"Reset Warnings" : @"Reset Settings";
   NSLog(@"Waiting for %@ to go away", elementName);
   NSArray *elements = [FBFindElementCommands elementsUsing:@"id" withValue:elementName under:app shouldReturnAfterFirstMatch:NO];
-  while (elements.count > 0) {
+  reset = 0;
+  while (elements.count > 0 && reset < 5) {
     [NSThread sleepForTimeInterval:0.2];
+    [self tap:elementName app:app];
     NSLog(@"Waiting for %@ to go away", elementName);
     elements = [FBFindElementCommands elementsUsing:@"id" withValue:elementName under:app shouldReturnAfterFirstMatch:NO];
   }
