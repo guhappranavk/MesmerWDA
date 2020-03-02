@@ -342,8 +342,10 @@
 + (BOOL)tap:(NSString *)name app:(XCUIApplication *)app {
   NSArray *elements = [FBFindElementCommands elementsUsing:@"id" withValue:name under:app shouldReturnAfterFirstMatch:NO];
   if (elements.count > 0) {
-    XCUIElement *element = elements[0];
-    return [element fb_tapWithError:nil];
+    for (XCUIElement *element in elements) {
+      [element fb_tapWithError:nil];
+    }
+    return YES;
   }
   return NO;
 }
