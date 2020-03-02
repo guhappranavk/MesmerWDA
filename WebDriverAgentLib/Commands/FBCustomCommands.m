@@ -268,8 +268,23 @@
     else {
       [FBElementCommands drag2:CGPointMake(app.frame.size.width/2, app.frame.size.height - 10) endPoint:CGPointMake(app.frame.size.width/2, app.frame.size.height/2) duration:0.001 velocity:1500];
     }
-    [self tap:@"Reset" app:app];
-    [self tap:@"Reset Location & Privacy" app:app];
+    NSInteger reset = 0;
+    while (reset < 5) {
+      if ([self tap:@"Reset" app:app]) {
+        break;
+      }
+      reset++;
+      [NSThread sleepForTimeInterval:0.2];
+    }
+    
+    reset = 0;
+    while (reset < 5) {
+      if ([self tap:@"Reset Location & Privacy" app:app]) {
+        break;
+      }
+      reset++;
+      [NSThread sleepForTimeInterval:0.2];
+    }
 
     if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
       if (![self tapButton:@"Reset" element:@"Reset Warnings" app:app]) {
@@ -277,11 +292,19 @@
       }
     }
     else {
-      [NSThread sleepForTimeInterval:0.2];
-      if (![self tap:@"Reset Warnings" app:app]) {
-        [self tap:@"Reset Settings" app:app];
+      reset = 0;
+      while (reset < 5) {
+        if (![self tap:@"Reset Warnings" app:app]) {
+          if ([self tap:@"Reset Settings" app:app]) {
+            break;
+          }
+        }
+        else {
+          break;
+        }
+        reset++;
+        [NSThread sleepForTimeInterval:0.2];
       }
-
     }
   }
   [NSThread sleepForTimeInterval:0.2];
