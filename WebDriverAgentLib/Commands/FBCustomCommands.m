@@ -259,6 +259,7 @@
     }
   }
   else {
+    NSLog(@"Tapping General");
     [self tap:@"General" app:app];
     if (UIInterfaceOrientationIsLandscape(app.interfaceOrientation)) {
       CGFloat width = MAX(app.frame.size.width, app.frame.size.height);
@@ -270,6 +271,7 @@
     }
     NSInteger reset = 0;
     while (reset < 5) {
+      NSLog(@"Tapping Reset");
       if ([self tap:@"Reset" app:app]) {
         break;
       }
@@ -279,6 +281,7 @@
     
     reset = 0;
     while (reset < 5) {
+      NSLog(@"Tapping Reset Location & Privacy");
       if ([self tap:@"Reset Location & Privacy" app:app]) {
         break;
       }
@@ -287,6 +290,7 @@
     }
 
     if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
+      NSLog(@"Tapping Reset Warnings or Settings");
       if (![self tapButton:@"Reset" element:@"Reset Warnings" app:app]) {
         [self tapButton:@"Reset" element:@"Reset Settings" app:app];
       }
@@ -294,6 +298,7 @@
     else {
       reset = 0;
       while (reset < 5) {
+        NSLog(@"Tapping Reset Warnings or Settings");
         if (![self tap:@"Reset Warnings" app:app]) {
           if ([self tap:@"Reset Settings" app:app]) {
             break;
@@ -308,6 +313,7 @@
     }
   }
   [NSThread sleepForTimeInterval:0.2];
+  NSLog(@"Killing settings app");
   [app terminate];
   return FBResponseWithOK();
 }
