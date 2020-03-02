@@ -246,7 +246,7 @@
 + (id<FBResponsePayload>)handleResetLocationCommand:(FBRouteRequest *)request
 {
   XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.Preferences"];
-  [app activate];
+  [app launch];
   
   if ([self tap:@"Reset Location & Privacy" app:app]) {
     if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
