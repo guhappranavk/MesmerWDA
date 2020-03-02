@@ -247,7 +247,7 @@
 {
   XCUIApplication *app = [[XCUIApplication alloc] initWithBundleIdentifier: @"com.apple.Preferences"];
   [app launch];
-  
+  BOOL warnings = NO;
   if ([self tap:@"Reset Location & Privacy" app:app]) {
     if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
       [self tapButton:@"Reset" element:@"Reset Warnings" app:app];
@@ -309,10 +309,12 @@
         NSLog(@"Tapping Reset Warnings or Settings");
         if (![self tap:@"Reset Warnings" app:app]) {
           if ([self tap:@"Reset Settings" app:app]) {
+            warnings = NO;
             break;
           }
         }
         else {
+          warnings = YES;
           break;
         }
         reset++;
@@ -320,7 +322,16 @@
       }
     }
   }
-  [NSThread sleepForTimeInterval:0.2];
+  
+  // wait for Reset Warnings is gone
+  NSString *elementName = warnings ? @"Reset Warnings" : @"Reset Settings";
+  NSLog(@"Waiting for %@ to go away", elementName);
+  NSArray *elements = [FBFindElementCommands elementsUsing:@"id" withValue:elementName under:app shouldReturnAfterFirstMatch:NO];
+  while (elements.count > 0) {
+    [NSThread sleepForTimeInterval:0.2];
+    NSLog(@"Waiting for %@ to go away", elementName);
+    elements = [FBFindElementCommands elementsUsing:@"id" withValue:elementName under:app shouldReturnAfterFirstMatch:NO];
+  }
   NSLog(@"Killing settings app");
   [app terminate];
   return FBResponseWithOK();
