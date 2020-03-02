@@ -259,8 +259,15 @@
     }
   }
   else {
-    NSLog(@"Tapping General");
-    [self tap:@"General" app:app];
+    NSInteger reset = 0;
+    while (reset < 5) {
+      NSLog(@"Tapping General");
+      if ([self tap:@"General" app:app]) {
+        break;
+      }
+      reset++;
+    }
+
     if (UIInterfaceOrientationIsLandscape(app.interfaceOrientation)) {
       CGFloat width = MAX(app.frame.size.width, app.frame.size.height);
       CGFloat height = MIN(app.frame.size.width, app.frame.size.height);
@@ -269,7 +276,8 @@
     else {
       [FBElementCommands drag2:CGPointMake(app.frame.size.width/2, app.frame.size.height - 10) endPoint:CGPointMake(app.frame.size.width/2, app.frame.size.height/2) duration:0.001 velocity:1500];
     }
-    NSInteger reset = 0;
+
+    reset = 0;
     while (reset < 5) {
       NSLog(@"Tapping Reset");
       if ([self tap:@"Reset" app:app]) {
