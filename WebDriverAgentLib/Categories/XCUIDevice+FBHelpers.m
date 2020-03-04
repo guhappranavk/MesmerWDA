@@ -330,8 +330,8 @@ static bool fb_isLocked;
       continue;
     }
     NSString *interfaceName = [NSString stringWithUTF8String:temp_addr->ifa_name];
-//    NSString * ip = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
-//    NSLog(@"if: %@ ip: %@", interfaceName, ip);
+    NSString * ip = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
+    NSLog(@"if: %@ ip: %@", interfaceName, ip);
     if ([interfaceName containsString:@"en"] == NO ||   // non ethernet interfaces
        [interfaceName containsString:@"en0"] == YES) {  // wi-fi interface
       temp_addr = temp_addr->ifa_next;
