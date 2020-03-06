@@ -92,7 +92,7 @@
   app.fb_shouldWaitForQuiescence = FBConfiguration.shouldWaitForQuiescence;
   app.launchArguments = (NSArray<NSString *> *)requirements[@"arguments"] ?: @[];
   app.launchEnvironment = (NSDictionary <NSString *, NSString *> *)requirements[@"environment"] ?: @{};
-  [app launch];
+  [app activate];
 
   if (app.processID == 0) {
     return FBResponseWithErrorFormat(@"Failed to launch %@ application", bundleID);
